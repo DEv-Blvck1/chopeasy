@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   X, Mail, Lock, User, Phone, Store, Eye, EyeOff,
   CheckCircle2, AlertCircle, ArrowRight, ShieldCheck,
@@ -61,10 +61,25 @@ export default function AuthModal({
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [forgotSuccess, setForgotSuccess] = useState(false);
-  const [timerCount, setTimerCount] = useState(45);
+
+  // Registration OTP verification state
+  const [registerStep, setRegisterStep] = useState<1 | 2>(1); // 1 = form, 2 = OTP
+  const [registerOtpCode, setRegisterOtpCode] = useState(["", "", "", "", "", ""]);
+  const [registerOtpTimer, setRegisterOtpTimer] = useState(60);
 
   // Form error message
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Countdown timer for registration OTP
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (mode === "register" && registerStep === 2 && registerOtpTimer > 0) {
+      timer = setInterval(() => {
+        setRegisterOtpTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [mode, registerStep, registerOtpTimer]);
 
   // Live password validation criteria calculation
   const validatePassword = (pwd: string) => {
@@ -88,7 +103,7 @@ export default function AuthModal({
   );
 
   const calculateStrength = (rules: ReturnType<typeof validatePassword>, pwd: string) => {
-    if (!pwd) return { score: 0, label: "Enter password", color: "bg-slate-200" };
+    if (!pwd) return { score: 0, label: "Enter password", color: "bg-slate-700" };
     const passed = Object.values(rules).filter(Boolean).length;
     if (passed <= 2) return { score: 25, label: "Weak", color: "bg-rose-500" };
     if (passed === 3) return { score: 50, label: "Fair", color: "bg-amber-500" };
@@ -113,7 +128,7 @@ export default function AuthModal({
     const vendorUser: UserSession = {
       name: loginForm.identifier.includes("amara") ? "Chef Amara Nwosu" : "Vendor Manager",
       email: loginForm.identifier,
-      businessName: "Amara's Kitchen & Grills",
+      businessName: "Amara's Kitchen Lekki",
       phone: "0803 123 4567",
       role: "vendor_owner",
     };
@@ -145,6 +160,53 @@ export default function AuthModal({
       return;
     }
 
+    // Advance to OTP verification step
+    setRegisterStep(2);
+    setRegisterOtpTimer(60);
+    setRegisterOtpCode(["", "", "", "", "", ""]);
+  };
+
+  const handleRegisterOtpChange = (index: number, val: string) => {
+    if (val.length > 1) val = val.slice(-1);
+    const updated = [...registerOtpCode];
+    updated[index] = val;
+    setRegisterOtpCode(updated);
+
+    // Auto advance focus
+    if (val && index < 5) {
+      const nextInput = document.getElementById(`register-otp-input-${index + 1}`);
+      nextInput?.focus();
+    }
+  };
+
+  const handleRegisterOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !registerOtpCode[index] && index > 0) {
+      const prevInput = document.getElementById(`register-otp-input-${index - 1}`);
+      prevInput?.focus();
+    }
+  };
+
+  const handleRegisterOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").trim().slice(0, 6);
+    if (!pasted) return;
+    const digits = pasted.split("");
+    const updated = [...registerOtpCode];
+    for (let i = 0; i < 6; i++) {
+      updated[i] = digits[i] || "";
+    }
+    setRegisterOtpCode(updated);
+  };
+
+  const handleRegisterOtpSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const code = registerOtpCode.join("");
+    if (code.length < 6) {
+      setErrorMessage("Please enter the complete 6-digit OTP code sent to your email.");
+      return;
+    }
+    setErrorMessage(null);
+
     const newUser: UserSession = {
       name: registerForm.fullName,
       email: registerForm.email,
@@ -155,6 +217,8 @@ export default function AuthModal({
 
     onSuccess(newUser);
     onClose();
+    setRegisterStep(1);
+    setRegisterOtpCode(["", "", "", "", "", ""]);
   };
 
   const handleForgotStep1 = (e: React.FormEvent) => {
@@ -214,21 +278,21 @@ export default function AuthModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-rose-100 flex flex-col md:flex-row overflow-hidden max-h-[92vh]">
-        {/* Left Side: Sizzling Food Plate with Animated Smoke & Brand Story */}
-        <div className="hidden md:flex md:w-5/12 bg-gradient-to-br from-slate-950 via-slate-900 to-rose-950 p-8 flex-col justify-between relative overflow-hidden text-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 dark:bg-black/80 backdrop-blur-xl animate-in fade-in duration-200">
+      <div className="relative w-full max-w-4xl bg-white/95 dark:bg-[#0c0d12]/95 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-white/10 flex flex-col md:flex-row overflow-hidden max-h-[92vh] text-slate-900 dark:text-white">
+        {/* Left Side: Sizzling Food Plate with Red & Black Theme */}
+        <div className="hidden md:flex md:w-5/12 bg-gradient-to-br from-[#060608] via-[#10070a] to-[#20050c] p-8 flex-col justify-between relative overflow-hidden text-white border-r border-white/10">
           <div className="absolute inset-0 z-0 pointer-events-auto opacity-75">
             <SteamingFoodPlate interactive={true} showBadges={false} className="w-full h-full" />
           </div>
 
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/40 to-slate-950/70 pointer-events-none z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#060608]/95 via-[#060608]/50 to-[#060608]/75 pointer-events-none z-10" />
 
           {/* Top brand header */}
           <div className="relative z-20">
             <ChopEasyLogo size="sm" dark={true} />
-            <div className="mt-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs text-amber-300 font-medium">
-              <Sparkles size={13} className="text-amber-400" />
+            <div className="mt-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs text-rose-300 font-medium">
+              <Sparkles size={13} className="text-rose-400" />
               <span>Sizzling Kitchen Network</span>
             </div>
           </div>
@@ -239,25 +303,25 @@ export default function AuthModal({
               Smart kitchen management, built for winners.
             </h2>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Track live walk-in, WhatsApp and phone orders. Update menu availability on the fly, and view instant revenue analytics.
+              Track live walk-in, WhatsApp, and phone orders. Update menu availability on the fly, and view instant revenue analytics.
             </p>
             <div className="pt-2 flex items-center gap-4 text-[11px] text-slate-400">
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 size={13} className="text-emerald-400" /> 99.9% Uptime
               </span>
               <span className="flex items-center gap-1.5">
-                <ShieldCheck size={13} className="text-amber-400" /> Bank-grade Security
+                <ShieldCheck size={13} className="text-rose-400" /> Bank-grade Security
               </span>
             </div>
           </div>
         </div>
 
         {/* Right Side: Auth Forms */}
-        <div className="w-full md:w-7/12 p-6 sm:p-8 flex flex-col overflow-y-auto bg-white relative">
+        <div className="w-full md:w-7/12 p-6 sm:p-8 flex flex-col overflow-y-auto bg-white/95 dark:bg-[#0e0f17]/95 relative text-slate-900 dark:text-white">
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-20"
+            className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors z-20"
           >
             <X size={20} />
           </button>
@@ -268,17 +332,17 @@ export default function AuthModal({
           </div>
 
           {/* Top Mode Tabs */}
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+          <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-white/10 pb-4 mb-5">
             <div className="flex gap-2">
               <button
                 onClick={() => {
                   setMode("login");
                   setErrorMessage(null);
                 }}
-                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 cursor-pointer ${
                   mode === "login"
-                    ? "bg-rose-50 text-rose-600 shadow-sm shadow-rose-500/10"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-gradient-to-r from-rose-600 to-red-700 text-white shadow-lg shadow-rose-950/60 border border-rose-400/40"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 Sign In
@@ -286,12 +350,13 @@ export default function AuthModal({
               <button
                 onClick={() => {
                   setMode("register");
+                  setRegisterStep(1);
                   setErrorMessage(null);
                 }}
-                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 cursor-pointer ${
                   mode === "register"
-                    ? "bg-rose-50 text-rose-600 shadow-sm shadow-rose-500/10"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-gradient-to-r from-rose-600 to-red-700 text-white shadow-lg shadow-rose-950/60 border border-rose-400/40"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 Create Account
@@ -299,7 +364,7 @@ export default function AuthModal({
             </div>
 
             {mode === "forgot" && (
-              <span className="text-xs font-semibold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg">
+              <span className="text-xs font-semibold text-rose-600 dark:text-rose-300 bg-rose-500/10 dark:bg-rose-500/20 border border-rose-500/30 px-2.5 py-1 rounded-lg">
                 Reset Password
               </span>
             )}
@@ -307,8 +372,8 @@ export default function AuthModal({
 
           {/* Error Banner */}
           {errorMessage && (
-            <div className="mb-4 p-3.5 rounded-2xl bg-rose-50 border border-rose-200/80 flex items-start gap-2.5 text-rose-700 text-xs">
-              <AlertCircle size={16} className="shrink-0 mt-0.5" />
+            <div className="mb-4 p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 flex items-start gap-2.5 text-rose-300 text-xs animate-shake">
+              <AlertCircle size={16} className="shrink-0 mt-0.5 text-rose-400" />
               <span>{errorMessage}</span>
             </div>
           )}
@@ -317,7 +382,7 @@ export default function AuthModal({
           {mode === "login" && (
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 block">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 block">
                   Email or Phone Number
                 </label>
                 <div className="relative">
@@ -328,14 +393,14 @@ export default function AuthModal({
                     value={loginForm.identifier}
                     onChange={(e) => setLoginForm({ ...loginForm, identifier: e.target.value })}
                     placeholder="e.g. chef@amarakitchen.ng or 080..."
-                    className="w-full bg-slate-50/70 border border-slate-200 rounded-2xl pl-10 pr-4 py-3 text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all"
+                    className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-2xl pl-10 pr-4 py-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-white/[0.08] focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/30 transition-all"
                   />
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block">
                     Password
                   </label>
                   <button
@@ -345,7 +410,7 @@ export default function AuthModal({
                       setForgotStep(1);
                       setErrorMessage(null);
                     }}
-                    className="text-xs font-bold text-rose-600 hover:text-rose-700 transition-colors"
+                    className="text-xs font-bold text-rose-600 dark:text-rose-400 hover:text-rose-500 dark:hover:text-rose-300 transition-colors cursor-pointer"
                   >
                     Forgot Password?
                   </button>
@@ -358,25 +423,25 @@ export default function AuthModal({
                     value={loginForm.password}
                     onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
                     placeholder="••••••••••••"
-                    className="w-full bg-slate-50/70 border border-slate-200 rounded-2xl pl-10 pr-11 py-3 text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all"
+                    className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-2xl pl-10 pr-11 py-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-white/[0.08] focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/30 transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 p-0.5"
+                    className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-700 dark:hover:text-white p-0.5 cursor-pointer"
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs text-slate-600 pt-1">
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pt-1">
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={loginForm.remember}
                     onChange={(e) => setLoginForm({ ...loginForm, remember: e.target.checked })}
-                    className="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-slate-300"
+                    className="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-slate-300 dark:border-white/20 bg-slate-100 dark:bg-white/10"
                   />
                   <span>Stay logged in for 30 days</span>
                 </label>
@@ -384,14 +449,14 @@ export default function AuthModal({
 
               <button
                 type="submit"
-                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-rose-600 to-amber-500 text-white font-bold text-sm shadow-lg shadow-rose-500/25 hover:from-rose-700 hover:to-amber-600 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-rose-600 via-rose-500 to-red-600 text-white font-bold text-sm shadow-xl shadow-rose-950/60 hover:from-rose-500 hover:to-red-600 hover:scale-[1.01] active:scale-95 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer border border-rose-400/30"
               >
                 Sign In to Kitchen Dashboard <ArrowRight size={16} />
               </button>
 
               {/* Demo quick switch */}
-              <div className="pt-3 border-t border-slate-100 text-center">
-                <p className="text-xs text-slate-400 mb-2">Need a quick test login?</p>
+              <div className="pt-3 border-t border-slate-200/80 dark:border-white/10 text-center">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Need a quick test login?</p>
                 <button
                   type="button"
                   onClick={() => {
@@ -401,21 +466,21 @@ export default function AuthModal({
                       remember: true,
                     });
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-all inline-flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 rounded-xl glass-btn text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-semibold transition-all inline-flex items-center gap-1.5 active:scale-95"
                 >
-                  <Sparkles size={13} className="text-amber-500" />
+                  <Sparkles size={13} className="text-rose-500 dark:text-rose-400" />
                   Auto-fill Demo Vendor Credentials
                 </button>
               </div>
             </form>
           )}
 
-          {/* Register form */}
-          {mode === "register" && (
+          {/* Register form (Step 1: Credentials) */}
+          {mode === "register" && registerStep === 1 && (
             <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                     Full Name *
                   </label>
                   <div className="relative">
@@ -426,13 +491,13 @@ export default function AuthModal({
                       value={registerForm.fullName}
                       onChange={(e) => setRegisterForm({ ...registerForm, fullName: e.target.value })}
                       placeholder="Chef Amara Nwosu"
-                      className="w-full bg-slate-50/70 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                      className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-white/[0.08] focus:outline-none focus:border-rose-500 transition-all"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                     Restaurant / Brand Name *
                   </label>
                   <div className="relative">
@@ -443,7 +508,7 @@ export default function AuthModal({
                       value={registerForm.businessName}
                       onChange={(e) => setRegisterForm({ ...registerForm, businessName: e.target.value })}
                       placeholder="Amara's Kitchen Lekki"
-                      className="w-full bg-slate-50/70 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                      className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-white/[0.08] focus:outline-none focus:border-rose-500 transition-all"
                     />
                   </div>
                 </div>
@@ -451,7 +516,7 @@ export default function AuthModal({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                     Email Address *
                   </label>
                   <div className="relative">
@@ -462,13 +527,13 @@ export default function AuthModal({
                       value={registerForm.email}
                       onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })}
                       placeholder="vendor@kitchen.ng"
-                      className="w-full bg-slate-50/70 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                      className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-white/[0.08] focus:outline-none focus:border-rose-500 transition-all"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                     Phone Number (WhatsApp) *
                   </label>
                   <div className="relative">
@@ -479,7 +544,7 @@ export default function AuthModal({
                       value={registerForm.phone}
                       onChange={(e) => setRegisterForm({ ...registerForm, phone: e.target.value })}
                       placeholder="0803 000 0000"
-                      className="w-full bg-slate-50/70 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                      className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-white/[0.08] focus:outline-none focus:border-rose-500 transition-all"
                     />
                   </div>
                 </div>
@@ -487,7 +552,7 @@ export default function AuthModal({
 
               {/* Password Input with Live Criteria Validation */}
               <div>
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                   Password *
                 </label>
                 <div className="relative">
@@ -498,12 +563,12 @@ export default function AuthModal({
                     value={registerForm.password}
                     onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
                     placeholder="Create a strong password"
-                    className="w-full bg-slate-50/70 border border-slate-200 rounded-xl pl-9 pr-10 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                    className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-10 py-2.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-white/[0.08] focus:outline-none focus:border-rose-500 transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -517,10 +582,10 @@ export default function AuthModal({
                       return (
                         <>
                           <div className="flex justify-between items-center text-[10px]">
-                            <span className="text-slate-500">Security Strength:</span>
-                            <span className="font-bold text-slate-700">{strength.label}</span>
+                            <span className="text-slate-500 dark:text-slate-400">Security Strength:</span>
+                            <span className="font-bold text-slate-800 dark:text-white">{strength.label}</span>
                           </div>
-                          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                          <div className="h-1.5 w-full bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
                             <div
                               className={`h-full ${strength.color} transition-all duration-300`}
                               style={{ width: `${strength.score}%` }}
@@ -533,8 +598,8 @@ export default function AuthModal({
                 )}
 
                 {/* Live Character & Requirements Validation Checklist */}
-                <div className="mt-2.5 p-3 rounded-xl bg-slate-50/80 border border-slate-200/70 space-y-1.5">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                <div className="mt-2.5 p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 space-y-1.5">
+                  <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     Password Security Criteria:
                   </p>
                   <div className="grid grid-cols-2 gap-1.5 text-[11px]">
@@ -543,12 +608,12 @@ export default function AuthModal({
                         className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] ${
                           registerPasswordRules.hasMinLen
                             ? "bg-emerald-500 text-white"
-                            : "bg-slate-200 text-slate-400"
+                            : "bg-slate-200 dark:bg-white/10 text-slate-400 dark:text-slate-500"
                         }`}
                       >
                         ✓
                       </span>
-                      <span className={registerPasswordRules.hasMinLen ? "text-emerald-700 font-semibold" : "text-slate-500"}>
+                      <span className={registerPasswordRules.hasMinLen ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-slate-500 dark:text-slate-400"}>
                         8+ characters
                       </span>
                     </div>
@@ -558,12 +623,12 @@ export default function AuthModal({
                         className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] ${
                           registerPasswordRules.hasUpper
                             ? "bg-emerald-500 text-white"
-                            : "bg-slate-200 text-slate-400"
+                            : "bg-slate-200 dark:bg-white/10 text-slate-400 dark:text-slate-500"
                         }`}
                       >
                         ✓
                       </span>
-                      <span className={registerPasswordRules.hasUpper ? "text-emerald-700 font-semibold" : "text-slate-500"}>
+                      <span className={registerPasswordRules.hasUpper ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-slate-500 dark:text-slate-400"}>
                         Uppercase (A-Z)
                       </span>
                     </div>
@@ -573,12 +638,12 @@ export default function AuthModal({
                         className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] ${
                           registerPasswordRules.hasLower
                             ? "bg-emerald-500 text-white"
-                            : "bg-slate-200 text-slate-400"
+                            : "bg-slate-200 dark:bg-white/10 text-slate-400 dark:text-slate-500"
                         }`}
                       >
                         ✓
                       </span>
-                      <span className={registerPasswordRules.hasLower ? "text-emerald-700 font-semibold" : "text-slate-500"}>
+                      <span className={registerPasswordRules.hasLower ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-slate-500 dark:text-slate-400"}>
                         Lowercase (a-z)
                       </span>
                     </div>
@@ -588,28 +653,28 @@ export default function AuthModal({
                         className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] ${
                           registerPasswordRules.hasNumber
                             ? "bg-emerald-500 text-white"
-                            : "bg-slate-200 text-slate-400"
+                            : "bg-slate-200 dark:bg-white/10 text-slate-400 dark:text-slate-500"
                         }`}
                       >
                         ✓
                       </span>
-                      <span className={registerPasswordRules.hasNumber ? "text-emerald-700 font-semibold" : "text-slate-500"}>
+                      <span className={registerPasswordRules.hasNumber ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-slate-500 dark:text-slate-400"}>
                         Number (0-9)
                       </span>
                     </div>
 
-                    <div className="col-span-2 flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 col-span-2">
                       <span
                         className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] ${
                           registerPasswordRules.hasSpecial
                             ? "bg-emerald-500 text-white"
-                            : "bg-slate-200 text-slate-400"
+                            : "bg-slate-200 dark:bg-white/10 text-slate-400 dark:text-slate-500"
                         }`}
                       >
                         ✓
                       </span>
-                      <span className={registerPasswordRules.hasSpecial ? "text-emerald-700 font-semibold" : "text-slate-500"}>
-                        Special character (@, $, !, %, *, #, etc.)
+                      <span className={registerPasswordRules.hasSpecial ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-slate-500 dark:text-slate-400"}>
+                        Special character (!@#$%^&*)
                       </span>
                     </div>
                   </div>
@@ -618,7 +683,7 @@ export default function AuthModal({
 
               {/* Confirm Password */}
               <div>
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                   Confirm Password *
                 </label>
                 <div className="relative">
@@ -629,12 +694,12 @@ export default function AuthModal({
                     value={registerForm.confirmPassword}
                     onChange={(e) => setRegisterForm({ ...registerForm, confirmPassword: e.target.value })}
                     placeholder="Re-type password"
-                    className="w-full bg-slate-50/70 border border-slate-200 rounded-xl pl-9 pr-10 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                    className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-10 py-2.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-white/[0.08] focus:outline-none focus:border-rose-500 transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
                   >
                     {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -642,11 +707,11 @@ export default function AuthModal({
                 {registerForm.confirmPassword && (
                   <p className="text-[11px] mt-1 font-medium">
                     {registerForm.password === registerForm.confirmPassword ? (
-                      <span className="text-emerald-600 flex items-center gap-1">
+                      <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                         <Check size={12} /> Passwords match perfectly
                       </span>
                     ) : (
-                      <span className="text-rose-500">Passwords do not match yet</span>
+                      <span className="text-rose-600 dark:text-rose-400">Passwords do not match yet</span>
                     )}
                   </p>
                 )}
@@ -654,20 +719,20 @@ export default function AuthModal({
 
               {/* Terms and Conditions Checkbox */}
               <div className="pt-1">
-                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-600 select-none">
+                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 dark:text-slate-300 select-none">
                   <input
                     type="checkbox"
                     required
                     checked={registerForm.agreedToTerms}
                     onChange={(e) => setRegisterForm({ ...registerForm, agreedToTerms: e.target.checked })}
-                    className="w-4 h-4 mt-0.5 rounded text-rose-600 focus:ring-rose-500 border-slate-300"
+                    className="w-4 h-4 mt-0.5 rounded text-rose-600 focus:ring-rose-500 border-slate-300 dark:border-white/20 bg-slate-100 dark:bg-white/10"
                   />
                   <span>
                     I have read and agree to the{" "}
                     <button
                       type="button"
                       onClick={() => setShowTermsModal(true)}
-                      className="font-bold text-rose-600 hover:underline"
+                      className="font-bold text-rose-600 dark:text-rose-400 hover:underline"
                     >
                       Terms and Conditions of Use
                     </button>{" "}
@@ -680,10 +745,97 @@ export default function AuthModal({
               <button
                 type="submit"
                 disabled={!isRegisterPasswordValid || !registerForm.agreedToTerms}
-                className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-rose-600 to-amber-500 text-white font-bold text-sm shadow-lg shadow-rose-500/25 hover:from-rose-700 hover:to-amber-600 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-rose-600 via-rose-500 to-red-600 text-white font-bold text-sm shadow-xl shadow-rose-950/60 hover:from-rose-500 hover:to-red-600 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-95 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer border border-rose-400/30"
               >
-                Create Vendor Account & Get Started <ArrowRight size={16} />
+                Continue to OTP Verification <ArrowRight size={16} />
               </button>
+            </form>
+          )}
+
+          {/* Register OTP Verification Step (Step 2 of 2) */}
+          {mode === "register" && registerStep === 2 && (
+            <form onSubmit={handleRegisterOtpSubmit} className="space-y-5 animate-fade-slide-up">
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRegisterStep(1);
+                    setErrorMessage(null);
+                  }}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                >
+                  <ArrowLeft size={14} /> Back to details
+                </button>
+                <span className="text-xs font-semibold text-rose-600 dark:text-rose-300 bg-rose-500/10 dark:bg-rose-500/20 border border-rose-500/30 px-2.5 py-1 rounded-lg">
+                  Step 2 of 2: Security Verification
+                </span>
+              </div>
+
+              <div className="text-center space-y-2">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-rose-600 to-red-700 flex items-center justify-center mx-auto shadow-lg shadow-rose-950/60 border border-rose-400/30">
+                  <ShieldCheck size={28} className="text-white" />
+                </div>
+                <h3 className="font-display font-bold text-xl text-slate-900 dark:text-white">
+                  Enter 6-Digit OTP Code
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto">
+                  We sent a 6-digit verification code to{" "}
+                  <span className="font-bold text-rose-600 dark:text-rose-300">{registerForm.email || "your registered email"}</span>. Enter the code below to activate your kitchen station.
+                </p>
+              </div>
+
+              {/* 6-box OTP Input */}
+              <div className="flex justify-center gap-2.5 sm:gap-3 py-2">
+                {registerOtpCode.map((digit, idx) => (
+                  <input
+                    key={idx}
+                    id={`register-otp-input-${idx}`}
+                    type="text"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleRegisterOtpChange(idx, e.target.value)}
+                    onKeyDown={(e) => handleRegisterOtpKeyDown(idx, e)}
+                    onPaste={handleRegisterOtpPaste}
+                    className="w-11 h-14 sm:w-12 sm:h-14 text-center font-mono font-black text-2xl bg-slate-50 dark:bg-white/[0.07] border border-slate-200 dark:border-white/15 rounded-2xl text-slate-900 dark:text-white focus:bg-white dark:focus:bg-white/[0.12] focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/30 transition-all duration-200"
+                  />
+                ))}
+              </div>
+
+              {/* Resend & Demo Helper */}
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-1">
+                <div>
+                  {registerOtpTimer > 0 ? (
+                    <span>Resend code in <strong className="text-rose-600 dark:text-rose-400 font-mono">{registerOtpTimer}s</strong></span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setRegisterOtpTimer(60)}
+                      className="font-bold text-rose-600 dark:text-rose-400 hover:text-rose-500 dark:hover:text-rose-300 transition-colors cursor-pointer inline-flex items-center gap-1"
+                    >
+                      <RefreshCw size={12} /> Resend OTP Code
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setRegisterOtpCode(["7", "3", "5", "1", "9", "4"])}
+                  className="font-bold text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
+                >
+                  Auto-fill Demo Code (735194)
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-rose-600 via-rose-500 to-red-600 text-white font-bold text-sm shadow-xl shadow-rose-950/60 hover:from-rose-500 hover:to-red-600 hover:scale-[1.01] active:scale-95 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer border border-rose-400/30"
+              >
+                Verify OTP & Launch Kitchen <ArrowRight size={16} />
+              </button>
+
+              <p className="text-center text-[11px] text-slate-500 dark:text-slate-400">
+                🔒 Protected by End-to-End SSL Kitchen Verification
+              </p>
             </form>
           )}
 
@@ -697,77 +849,77 @@ export default function AuthModal({
                     setMode("login");
                     setErrorMessage(null);
                   }}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
                 >
                   <ArrowLeft size={14} /> Back to Sign In
                 </button>
-                <div className="flex items-center gap-1 text-xs text-slate-400 font-mono">
+                <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 font-mono">
                   <span>Step {forgotStep} of 3</span>
                 </div>
               </div>
 
               {forgotSuccess ? (
-                <div className="p-6 text-center space-y-3 bg-emerald-50 rounded-2xl border border-emerald-200">
-                  <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/25">
+                <div className="p-6 text-center space-y-3 bg-emerald-500/15 rounded-2xl border border-emerald-500/30">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto shadow-lg shadow-emerald-950/50">
                     <Check size={24} />
                   </div>
-                  <h3 className="font-display font-bold text-lg text-emerald-950">
+                  <h3 className="font-display font-bold text-lg text-emerald-600 dark:text-emerald-300">
                     Password Reset Successfully!
                   </h3>
-                  <p className="text-xs text-emerald-700">
-                    Your password has been updated. Redirecting you to sign in...
+                  <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80">
+                    Your password has been changed. Signing you in automatically...
                   </p>
                 </div>
               ) : (
                 <>
-                  {/* Step 1: Request Reset Code */}
+                  {/* Step 1 */}
                   {forgotStep === 1 && (
                     <form onSubmit={handleForgotStep1} className="space-y-4">
                       <div>
-                        <h3 className="font-display font-bold text-xl text-slate-900">
-                          Reset Your Password
+                        <h3 className="font-display font-bold text-xl text-slate-900 dark:text-white">
+                          Forgot your password?
                         </h3>
-                        <p className="text-xs text-slate-500 mt-1">
-                          Enter your registered email address. We will send a 6-digit verification code to reset your account credentials.
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                          Enter your registered vendor email and we will send a 6-digit verification code.
                         </p>
                       </div>
 
                       <div>
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 block">
-                          Registered Email Address *
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
+                          Registered Email Address
                         </label>
                         <div className="relative">
-                          <Mail size={17} className="absolute left-3.5 top-3.5 text-slate-400" />
+                          <Mail size={16} className="absolute left-3 top-3.5 text-slate-400" />
                           <input
                             type="email"
                             required
                             value={forgotEmail}
                             onChange={(e) => setForgotEmail(e.target.value)}
                             placeholder="chefamara@chopeasy.ng"
-                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-4 py-3 text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                            className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-2xl pl-10 pr-4 py-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-white/[0.08] focus:outline-none focus:border-rose-500 transition-all"
                           />
                         </div>
                       </div>
 
                       <button
                         type="submit"
-                        className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-rose-600 to-amber-500 text-white font-bold text-sm shadow-lg shadow-rose-500/25 hover:from-rose-700 hover:to-amber-600 transition-all flex items-center justify-center gap-2"
+                        className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-rose-600 via-rose-500 to-red-600 text-white font-bold text-sm shadow-xl shadow-rose-950/60 hover:from-rose-500 hover:to-red-600 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer border border-rose-400/30"
                       >
                         Send Verification Code <ArrowRight size={16} />
                       </button>
                     </form>
                   )}
 
-                  {/* Step 2: 6-digit OTP Code Input */}
+                  {/* Step 2 */}
                   {forgotStep === 2 && (
                     <form onSubmit={handleForgotStep2} className="space-y-4">
                       <div>
-                        <h3 className="font-display font-bold text-xl text-slate-900">
+                        <h3 className="font-display font-bold text-xl text-slate-900 dark:text-white">
                           Enter Verification Code
                         </h3>
-                        <p className="text-xs text-slate-500 mt-1">
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
                           We sent a 6-digit code to{" "}
-                          <span className="font-bold text-slate-800">{forgotEmail}</span>. Enter it below to verify.
+                          <span className="font-bold text-rose-600 dark:text-rose-300">{forgotEmail}</span>. Enter it below to verify.
                         </p>
                       </div>
 
@@ -780,17 +932,17 @@ export default function AuthModal({
                             maxLength={1}
                             value={digit}
                             onChange={(e) => handleOtpChange(idx, e.target.value)}
-                            className="w-12 h-14 text-center font-mono font-bold text-xl bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all"
+                            className="w-12 h-14 text-center font-mono font-bold text-xl bg-slate-50 dark:bg-white/[0.07] border border-slate-200 dark:border-white/15 rounded-2xl text-slate-900 dark:text-white focus:bg-white dark:focus:bg-white/[0.12] focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/30 transition-all"
                           />
                         ))}
                       </div>
 
-                      <div className="flex items-center justify-between text-xs text-slate-500">
+                      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                         <span>Didn't receive code?</span>
                         <button
                           type="button"
                           onClick={() => setOtpCode(["4", "8", "2", "9", "1", "6"])}
-                          className="font-bold text-rose-600 hover:underline"
+                          className="font-bold text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
                         >
                           Auto-fill Demo Code (482916)
                         </button>
@@ -798,27 +950,27 @@ export default function AuthModal({
 
                       <button
                         type="submit"
-                        className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-rose-600 to-amber-500 text-white font-bold text-sm shadow-lg shadow-rose-500/25 hover:from-rose-700 hover:to-amber-600 transition-all flex items-center justify-center gap-2"
+                        className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-rose-600 via-rose-500 to-red-600 text-white font-bold text-sm shadow-xl shadow-rose-950/60 hover:from-rose-500 hover:to-red-600 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer border border-rose-400/30"
                       >
                         Verify & Proceed <ArrowRight size={16} />
                       </button>
                     </form>
                   )}
 
-                  {/* Step 3: Enter New Password with full validation */}
+                  {/* Step 3 */}
                   {forgotStep === 3 && (
                     <form onSubmit={handleForgotStep3} className="space-y-4">
                       <div>
-                        <h3 className="font-display font-bold text-xl text-slate-900">
+                        <h3 className="font-display font-bold text-xl text-slate-900 dark:text-white">
                           Set New Password
                         </h3>
-                        <p className="text-xs text-slate-500 mt-1">
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
                           Ensure your new password meets all security rules to protect your kitchen orders.
                         </p>
                       </div>
 
                       <div>
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                           New Password *
                         </label>
                         <div className="relative">
@@ -829,39 +981,39 @@ export default function AuthModal({
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
                             placeholder="Enter new password"
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-10 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                            className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-10 py-2.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-white/[0.08] focus:outline-none focus:border-rose-500 transition-all"
                           />
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
+                            className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
                           >
                             {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                           </button>
                         </div>
 
                         {/* Live Criteria Checklist */}
-                        <div className="mt-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 grid grid-cols-2 gap-1 text-[10px]">
-                          <span className={newPasswordRules.hasMinLen ? "text-emerald-700 font-bold" : "text-slate-400"}>
+                        <div className="mt-2 p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 grid grid-cols-2 gap-1 text-[10px]">
+                          <span className={newPasswordRules.hasMinLen ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-400 dark:text-slate-500"}>
                             ✓ 8+ chars
                           </span>
-                          <span className={newPasswordRules.hasUpper ? "text-emerald-700 font-bold" : "text-slate-400"}>
+                          <span className={newPasswordRules.hasUpper ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-400 dark:text-slate-500"}>
                             ✓ Uppercase (A-Z)
                           </span>
-                          <span className={newPasswordRules.hasLower ? "text-emerald-700 font-bold" : "text-slate-400"}>
+                          <span className={newPasswordRules.hasLower ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-400 dark:text-slate-500"}>
                             ✓ Lowercase (a-z)
                           </span>
-                          <span className={newPasswordRules.hasNumber ? "text-emerald-700 font-bold" : "text-slate-400"}>
+                          <span className={newPasswordRules.hasNumber ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-400 dark:text-slate-500"}>
                             ✓ Number (0-9)
                           </span>
-                          <span className={`col-span-2 ${newPasswordRules.hasSpecial ? "text-emerald-700 font-bold" : "text-slate-400"}`}>
+                          <span className={`col-span-2 ${newPasswordRules.hasSpecial ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-400 dark:text-slate-500"}`}>
                             ✓ Special char (@, $, !, %, *, #)
                           </span>
                         </div>
                       </div>
 
                       <div>
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                           Confirm New Password *
                         </label>
                         <div className="relative">
@@ -872,12 +1024,12 @@ export default function AuthModal({
                             value={confirmNewPassword}
                             onChange={(e) => setConfirmNewPassword(e.target.value)}
                             placeholder="Re-enter new password"
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-10 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                            className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-10 py-2.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-white/[0.08] focus:outline-none focus:border-rose-500 transition-all"
                           />
                           <button
                             type="button"
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
+                            className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
                           >
                             {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                           </button>
@@ -887,7 +1039,7 @@ export default function AuthModal({
                       <button
                         type="submit"
                         disabled={!isNewPasswordValid || newPassword !== confirmNewPassword}
-                        className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-rose-600 to-amber-500 text-white font-bold text-sm shadow-lg shadow-rose-500/25 hover:from-rose-700 hover:to-amber-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                        className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-rose-600 via-rose-500 to-red-600 text-white font-bold text-sm shadow-xl shadow-rose-950/60 hover:from-rose-500 hover:to-red-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 cursor-pointer border border-rose-400/30"
                       >
                         Save New Password & Sign In <Check size={16} />
                       </button>
@@ -909,4 +1061,3 @@ export default function AuthModal({
     </div>
   );
 }
-

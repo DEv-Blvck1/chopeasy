@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { X, ShieldCheck, Check, FileText, ChevronRight, Lock, ChefHat, AlertCircle } from "lucide-react";
+import { X, Check, FileText, AlertCircle } from "lucide-react";
 
 interface TermsModalProps {
   isOpen: boolean;
@@ -13,41 +13,41 @@ export default function TermsModal({ isOpen, onClose, onAccept }: TermsModalProp
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-amber-100 flex flex-col max-h-[88vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-xl animate-in fade-in duration-200">
+      <div className="relative w-full max-w-2xl bg-white dark:bg-[#0c0d12]/95 text-slate-900 dark:text-white rounded-3xl shadow-2xl border border-black/10 dark:border-white/10 flex flex-col max-h-[88vh] overflow-hidden">
         {/* Header */}
-        <div className="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-amber-50/60 via-rose-50/40 to-white">
+        <div className="p-5 sm:p-6 border-b border-black/5 dark:border-white/10 flex items-center justify-between bg-black/[0.02] dark:bg-white/[0.02]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-600 to-amber-500 flex items-center justify-center text-white shadow-md shadow-rose-500/20">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-600 to-red-700 flex items-center justify-center text-white shadow-md shadow-rose-950/60 border border-rose-400/30">
               <FileText size={20} />
             </div>
             <div>
-              <h3 className="font-display font-bold text-xl text-slate-900 leading-tight">
+              <h3 className="font-display font-bold text-xl text-slate-900 dark:text-white leading-tight">
                 Terms and Conditions of Use
               </h3>
-              <p className="text-xs text-slate-500">ChopEasy Vendor Agreement · Last updated November 2026</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">ChopEasy Vendor Agreement · Last updated November 2026</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Scrollable Terms Content */}
-        <div className="p-6 overflow-y-auto space-y-5 text-sm text-slate-600 leading-relaxed">
-          <div className="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200/60 flex items-start gap-3">
-            <AlertCircle size={18} className="text-amber-600 shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-900 leading-relaxed font-medium">
+        <div className="p-6 overflow-y-auto space-y-5 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+          <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-start gap-3">
+            <AlertCircle size={18} className="text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
+            <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed font-medium">
               Please read these terms carefully before registering your food vendor account. By checking "I agree" and creating an account, you enter into a binding agreement with ChopEasy.
             </p>
           </div>
 
           <section className="space-y-2">
-            <h4 className="font-display font-bold text-slate-900 text-base flex items-center gap-2">
-              <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-700 text-xs flex items-center justify-center font-bold">1</span>
+            <h4 className="font-display font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-rose-500/20 text-rose-600 dark:text-rose-300 text-xs flex items-center justify-center font-bold border border-rose-500/30">1</span>
               Acceptance & Platform Scope
             </h4>
             <p>
@@ -56,8 +56,8 @@ export default function TermsModal({ isOpen, onClose, onAccept }: TermsModalProp
           </section>
 
           <section className="space-y-2">
-            <h4 className="font-display font-bold text-slate-900 text-base flex items-center gap-2">
-              <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-700 text-xs flex items-center justify-center font-bold">2</span>
+            <h4 className="font-display font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-rose-500/20 text-rose-600 dark:text-rose-300 text-xs flex items-center justify-center font-bold border border-rose-500/30">2</span>
               Vendor Account & Credentials
             </h4>
             <p>
@@ -66,8 +66,8 @@ export default function TermsModal({ isOpen, onClose, onAccept }: TermsModalProp
           </section>
 
           <section className="space-y-2">
-            <h4 className="font-display font-bold text-slate-900 text-base flex items-center gap-2">
-              <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-700 text-xs flex items-center justify-center font-bold">3</span>
+            <h4 className="font-display font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-rose-500/20 text-rose-600 dark:text-rose-300 text-xs flex items-center justify-center font-bold border border-rose-500/30">3</span>
               Food Safety & Culinary Standards
             </h4>
             <p>
@@ -76,18 +76,18 @@ export default function TermsModal({ isOpen, onClose, onAccept }: TermsModalProp
           </section>
 
           <section className="space-y-2">
-            <h4 className="font-display font-bold text-slate-900 text-base flex items-center gap-2">
-              <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-700 text-xs flex items-center justify-center font-bold">4</span>
-              Pricing, Currency & Transactions
+            <h4 className="font-display font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-rose-500/20 text-rose-600 dark:text-rose-300 text-xs flex items-center justify-center font-bold border border-rose-500/30">4</span>
+              Zero Commission & Direct Payments
             </h4>
             <p>
-              All menu prices are designated in Nigerian Naira (₦) unless explicitly configured otherwise. Vendors retain full discretion over menu pricing, discounts, and item availability toggles. ChopEasy does not deduct hidden charges from your direct cash or transfer orders.
+              Unlike conventional aggregators that deduct hefty percentages per order, ChopEasy charges zero commission on sales. Direct bank payouts, WhatsApp payments, and POS collections are handled straight between you and your customers.
             </p>
           </section>
 
           <section className="space-y-2">
-            <h4 className="font-display font-bold text-slate-900 text-base flex items-center gap-2">
-              <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-700 text-xs flex items-center justify-center font-bold">5</span>
+            <h4 className="font-display font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-rose-500/20 text-rose-600 dark:text-rose-300 text-xs flex items-center justify-center font-bold border border-rose-500/30">5</span>
               Customer Communications & Privacy
             </h4>
             <p>
@@ -96,8 +96,8 @@ export default function TermsModal({ isOpen, onClose, onAccept }: TermsModalProp
           </section>
 
           <section className="space-y-2">
-            <h4 className="font-display font-bold text-slate-900 text-base flex items-center gap-2">
-              <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-700 text-xs flex items-center justify-center font-bold">6</span>
+            <h4 className="font-display font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-rose-500/20 text-rose-600 dark:text-rose-300 text-xs flex items-center justify-center font-bold border border-rose-500/30">6</span>
               Modifications to Service
             </h4>
             <p>
@@ -107,10 +107,10 @@ export default function TermsModal({ isOpen, onClose, onAccept }: TermsModalProp
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/80 flex items-center justify-between gap-3">
+        <div className="p-4 sm:p-5 border-t border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] flex items-center justify-between gap-3">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-100 transition-colors"
+            className="px-5 py-2.5 rounded-xl glass-btn text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-semibold text-sm transition-colors cursor-pointer"
           >
             Close
           </button>
@@ -121,14 +121,14 @@ export default function TermsModal({ isOpen, onClose, onAccept }: TermsModalProp
                 onAccept();
                 onClose();
               }}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 text-white font-bold text-sm shadow-md shadow-rose-500/25 hover:from-rose-700 hover:to-amber-600 transition-all"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 via-rose-500 to-red-600 text-white font-bold text-sm shadow-xl shadow-rose-950/60 hover:from-rose-500 hover:to-red-600 border border-rose-400/30 transition-all cursor-pointer active:scale-95"
             >
               <Check size={16} /> I Agree & Accept
             </button>
           ) : (
             <button
               onClick={onClose}
-              className="px-6 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-sm hover:bg-slate-800 transition-colors"
+              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-700 text-white font-bold text-sm hover:from-rose-500 hover:to-red-600 border border-rose-400/30 transition-colors cursor-pointer"
             >
               Done
             </button>
@@ -138,4 +138,3 @@ export default function TermsModal({ isOpen, onClose, onAccept }: TermsModalProp
     </div>
   );
 }
-

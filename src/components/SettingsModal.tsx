@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import {
   X, User, Store, Mail, Phone, MapPin, Bell,
-  DollarSign, Shield, Check, Lock, Sliders, Sparkles
+  Shield, Check, Lock, Sliders
 } from "lucide-react";
 import { UserSession } from "./AuthModal";
 
@@ -94,31 +94,31 @@ export default function SettingsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-rose-100 flex flex-col max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-xl animate-in fade-in duration-200">
+      <div className="relative w-full max-w-2xl bg-white dark:bg-[#0c0d12]/95 text-slate-900 dark:text-white rounded-3xl shadow-2xl border border-black/10 dark:border-white/10 flex flex-col max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 via-white to-amber-50/40">
+        <div className="p-5 border-b border-black/5 dark:border-white/10 flex items-center justify-between bg-black/[0.02] dark:bg-white/[0.02]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-600 to-amber-500 flex items-center justify-center text-white shadow-md shadow-rose-500/20 font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-600 to-red-700 flex items-center justify-center text-white shadow-md shadow-rose-950/60 font-bold border border-rose-400/30">
               {name.charAt(0)}
             </div>
             <div>
-              <h3 className="font-display font-bold text-xl text-slate-900 leading-tight">
+              <h3 className="font-display font-bold text-xl text-slate-900 dark:text-white leading-tight">
                 Profile & Kitchen Settings
               </h3>
-              <p className="text-xs text-slate-500">{businessName} · Management Panel</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{businessName} · Management Panel</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex border-b border-slate-100 px-6 pt-2 bg-slate-50/60 gap-4">
+        <div className="flex border-b border-black/5 dark:border-white/10 px-6 pt-2 bg-black/[0.02] dark:bg-white/[0.02] gap-4">
           {[
             { id: "profile", label: "Vendor Profile", icon: <User size={15} /> },
             { id: "kitchen", label: "Kitchen Operations", icon: <Sliders size={15} /> },
@@ -130,10 +130,10 @@ export default function SettingsModal({
                 setActiveTab(tab.id as typeof activeTab);
                 setErrorMsg(null);
               }}
-              className={`flex items-center gap-2 py-3 text-xs font-bold border-b-2 transition-all ${
+              className={`flex items-center gap-2 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer ${
                 activeTab === tab.id
-                  ? "border-rose-600 text-rose-600"
-                  : "border-transparent text-slate-500 hover:text-slate-800"
+                  ? "border-rose-500 text-rose-600 dark:text-rose-400"
+                  : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               {tab.icon}
@@ -143,16 +143,16 @@ export default function SettingsModal({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSave} className="p-6 overflow-y-auto space-y-4 flex-1">
+        <form onSubmit={handleSave} className="p-6 overflow-y-auto space-y-5 flex-1">
           {errorMsg && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
-              {errorMsg}
+            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-2">
+              <span>⚠️</span> {errorMsg}
             </div>
           )}
 
           {savedSuccess && (
-            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
-              <Check size={16} className="text-emerald-600" />
+            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-2">
+              <Check size={16} className="text-emerald-500" />
               Settings updated successfully!
             </div>
           )}
@@ -162,7 +162,7 @@ export default function SettingsModal({
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                     Full Name
                   </label>
                   <div className="relative">
@@ -172,13 +172,13 @@ export default function SettingsModal({
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                      className="w-full bg-slate-50 dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 dark:text-white focus:bg-white dark:focus:bg-white/[0.1] focus:outline-none focus:border-rose-500 transition-all"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                     Restaurant / Brand Name
                   </label>
                   <div className="relative">
@@ -188,7 +188,7 @@ export default function SettingsModal({
                       required
                       value={businessName}
                       onChange={(e) => setBusinessName(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                      className="w-full bg-slate-50 dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 dark:text-white focus:bg-white dark:focus:bg-white/[0.1] focus:outline-none focus:border-rose-500 transition-all"
                     />
                   </div>
                 </div>
@@ -196,7 +196,7 @@ export default function SettingsModal({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                     Email Address
                   </label>
                   <div className="relative">
@@ -206,13 +206,13 @@ export default function SettingsModal({
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                      className="w-full bg-slate-50 dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 dark:text-white focus:bg-white dark:focus:bg-white/[0.1] focus:outline-none focus:border-rose-500 transition-all"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                     Phone Number (WhatsApp)
                   </label>
                   <div className="relative">
@@ -222,14 +222,14 @@ export default function SettingsModal({
                       required
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                      className="w-full bg-slate-50 dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 dark:text-white focus:bg-white dark:focus:bg-white/[0.1] focus:outline-none focus:border-rose-500 transition-all"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                   Kitchen Location / Pickup Base
                 </label>
                 <div className="relative">
@@ -239,7 +239,7 @@ export default function SettingsModal({
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="e.g. Admiralty Way, Lekki Phase 1, Lagos"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                    className="w-full bg-slate-50 dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 dark:text-white focus:bg-white dark:focus:bg-white/[0.1] focus:outline-none focus:border-rose-500 transition-all"
                   />
                 </div>
               </div>
@@ -251,13 +251,13 @@ export default function SettingsModal({
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                     Operating Currency
                   </label>
                   <select
                     value={currency}
                     onChange={(e) => setCurrency(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all font-medium"
+                    className="w-full bg-slate-50 dark:bg-[#12131a] border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2.5 text-xs text-slate-900 dark:text-white focus:bg-white dark:focus:bg-[#181924] focus:outline-none focus:border-rose-500 transition-all font-medium"
                   >
                     <option value="NGN">₦ Nigerian Naira (NGN)</option>
                     <option value="USD">$ US Dollar (USD)</option>
@@ -267,26 +267,26 @@ export default function SettingsModal({
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                     Daily Sales Target ({currency === "USD" ? "$" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "₦"})
                   </label>
                   <input
                     type="number"
                     value={dailyTarget}
                     onChange={(e) => setDailyTarget(Number(e.target.value))}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-mono text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                    className="w-full bg-slate-50 dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2.5 text-xs font-mono text-slate-900 dark:text-white focus:bg-white dark:focus:bg-white/[0.1] focus:outline-none focus:border-rose-500 transition-all"
                   />
                 </div>
               </div>
 
               {/* Toggles */}
               <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10">
                   <div className="flex items-center gap-3">
-                    <Bell size={18} className="text-amber-600" />
+                    <Bell size={18} className="text-amber-500" />
                     <div>
-                      <p className="text-xs font-bold text-slate-800">Sound Alert on New Orders</p>
-                      <p className="text-[11px] text-slate-500">Chime speaker when a new customer order drops</p>
+                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Sound Alert on New Orders</p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">Chime speaker when a new customer order drops</p>
                     </div>
                   </div>
                   <input
@@ -297,12 +297,12 @@ export default function SettingsModal({
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10">
                   <div className="flex items-center gap-3">
-                    <Phone size={18} className="text-emerald-600" />
+                    <Phone size={18} className="text-emerald-500" />
                     <div>
-                      <p className="text-xs font-bold text-slate-800">Auto-prompt WhatsApp Dispatch</p>
-                      <p className="text-[11px] text-slate-500">Provide 1-click customer chat when food is marked ready</p>
+                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Auto-prompt WhatsApp Dispatch</p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">Provide 1-click customer chat when food is marked ready</p>
                     </div>
                   </div>
                   <input
@@ -320,7 +320,7 @@ export default function SettingsModal({
           {activeTab === "security" && (
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                   Current Password
                 </label>
                 <div className="relative">
@@ -330,14 +330,14 @@ export default function SettingsModal({
                     value={currentPwd}
                     onChange={(e) => setCurrentPwd(e.target.value)}
                     placeholder="Enter current password"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                    className="w-full bg-slate-50 dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 dark:text-white focus:bg-white dark:focus:bg-white/[0.1] focus:outline-none focus:border-rose-500 transition-all"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                     New Password
                   </label>
                   <input
@@ -345,12 +345,12 @@ export default function SettingsModal({
                     value={newPwd}
                     onChange={(e) => setNewPwd(e.target.value)}
                     placeholder="Min 8 characters"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                    className="w-full bg-slate-50 dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2.5 text-xs text-slate-900 dark:text-white focus:bg-white dark:focus:bg-white/[0.1] focus:outline-none focus:border-rose-500 transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                     Confirm New Password
                   </label>
                   <input
@@ -358,29 +358,29 @@ export default function SettingsModal({
                     value={confirmPwd}
                     onChange={(e) => setConfirmPwd(e.target.value)}
                     placeholder="Re-type new password"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                    className="w-full bg-slate-50 dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2.5 text-xs text-slate-900 dark:text-white focus:bg-white dark:focus:bg-white/[0.1] focus:outline-none focus:border-rose-500 transition-all"
                   />
                 </div>
               </div>
 
-              <div className="p-3 rounded-2xl bg-amber-50/70 border border-amber-200 text-xs text-amber-900">
+              <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800 dark:text-amber-200">
                 🔒 Keep your password unique to protect daily food revenue and customer numbers.
               </div>
             </div>
           )}
 
           {/* Footer Actions */}
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+          <div className="pt-4 border-t border-black/5 dark:border-white/10 flex items-center justify-between">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition-colors"
+              className="px-4 py-2.5 rounded-xl glass-btn text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 text-white font-bold text-xs shadow-md shadow-rose-500/20 hover:from-rose-700 hover:to-amber-600 transition-all"
+              className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-700 text-white font-bold text-xs shadow-lg shadow-rose-950/60 hover:from-rose-500 hover:to-red-600 border border-rose-400/30 transition-all cursor-pointer"
             >
               <Check size={14} /> Save Changes
             </button>
@@ -390,4 +390,3 @@ export default function SettingsModal({
     </div>
   );
 }
-

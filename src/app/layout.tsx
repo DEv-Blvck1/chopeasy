@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -20,9 +21,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full">
-      <body className="h-full antialiased font-sans bg-[#fbf8f3] text-slate-900 selection:bg-rose-500 selection:text-white">
-        {children}
+    <html lang="en" className="h-full dark" data-theme="dark" suppressHydrationWarning>
+      <body className="h-full antialiased font-sans selection:bg-rose-500 selection:text-white transition-colors duration-300">
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

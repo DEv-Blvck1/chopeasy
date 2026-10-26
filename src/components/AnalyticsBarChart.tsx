@@ -63,19 +63,19 @@ export default function AnalyticsBarChart({
   const avgVal = Math.round(totalRevenue / currentDataset.length);
 
   return (
-    <div className="glass-panel rounded-3xl p-6 shadow-sm border border-slate-200/80 space-y-6">
+    <div className="glass-panel rounded-3xl p-6 shadow-sm border border-black/5 dark:border-white/10 space-y-6 text-slate-900 dark:text-white">
       {/* Top Header & Switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-rose-50 text-rose-600">
+            <div className="p-2 rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/20">
               <BarChart3 size={18} />
             </div>
             <div>
-              <h3 className="font-display font-bold text-lg text-slate-900 leading-tight">
+              <h3 className="font-display font-bold text-lg text-slate-900 dark:text-white leading-tight">
                 Sales & Performance Growth Analysis
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Visual revenue telemetry, order velocity, and capacity targets
               </p>
             </div>
@@ -83,7 +83,7 @@ export default function AnalyticsBarChart({
         </div>
 
         {/* View Switcher Buttons */}
-        <div className="flex items-center p-1 rounded-2xl bg-slate-100 border border-slate-200/80 self-start sm:self-auto">
+        <div className="flex items-center p-1 rounded-2xl bg-black/[0.04] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 self-start sm:self-auto">
           {[
             { id: "weekly", label: "Last 7 Days" },
             { id: "hourly", label: "Hourly Rush" },
@@ -97,8 +97,8 @@ export default function AnalyticsBarChart({
               }}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 viewMode === tab.id
-                  ? "bg-white text-slate-900 shadow-xs"
-                  : "text-slate-500 hover:text-slate-900"
+                  ? "bg-white dark:bg-rose-600 text-slate-900 dark:text-white shadow-xs"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               {tab.label}
@@ -108,28 +108,28 @@ export default function AnalyticsBarChart({
       </div>
 
       {/* KPI Highlights Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-slate-50/70 border border-slate-200/70">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/10">
         <div>
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Sales In Window</p>
-          <p className="font-display font-extrabold text-lg text-slate-900 mt-0.5">
+          <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Sales In Window</p>
+          <p className="font-display font-extrabold text-lg text-slate-900 dark:text-white mt-0.5">
             {formatMoney(totalRevenue)}
           </p>
         </div>
         <div>
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Orders Dispatched</p>
-          <p className="font-display font-extrabold text-lg text-rose-600 mt-0.5">
+          <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Orders Dispatched</p>
+          <p className="font-display font-extrabold text-lg text-rose-600 dark:text-rose-400 mt-0.5">
             {totalOrders} tickets
           </p>
         </div>
         <div>
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Average Ticket Run</p>
-          <p className="font-display font-extrabold text-lg text-amber-600 mt-0.5">
+          <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Average Ticket Run</p>
+          <p className="font-display font-extrabold text-lg text-amber-600 dark:text-amber-400 mt-0.5">
             {formatMoney(avgVal)}
           </p>
         </div>
         <div>
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Pacing Growth Rate</p>
-          <p className="font-display font-extrabold text-lg text-emerald-600 mt-0.5 flex items-center gap-1">
+          <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Pacing Growth Rate</p>
+          <p className="font-display font-extrabold text-lg text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-center gap-1">
             <ArrowUpRight size={16} /> +28.4%
           </p>
         </div>
@@ -152,7 +152,7 @@ export default function AnalyticsBarChart({
         )}
 
         {/* Visual Bars */}
-        <div className="flex items-end justify-between gap-2 sm:gap-4 h-64 border-b border-slate-200 px-2 sm:px-4">
+        <div className="flex items-end justify-between gap-2 sm:gap-4 h-64 border-b border-black/10 dark:border-white/10 px-2 sm:px-4">
           {currentDataset.map((item, idx) => {
             const heightPct = Math.round((item.val / maxVal) * 100);
             const isHovered = hoveredIdx === idx;
@@ -167,7 +167,7 @@ export default function AnalyticsBarChart({
               >
                 {/* Floating Tooltip */}
                 {isHovered && (
-                  <div className="absolute -top-20 z-30 p-2.5 rounded-xl bg-slate-950 text-white shadow-xl text-center w-36 sm:w-40 pointer-events-none animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute -top-20 z-30 p-2.5 rounded-xl bg-slate-950 text-white shadow-xl text-center w-36 sm:w-40 pointer-events-none animate-in fade-in zoom-in-95 duration-150 border border-white/10">
                     <p className="font-bold text-xs text-amber-300">{item.fullLabel}</p>
                     <p className="font-mono font-black text-sm text-white mt-0.5">{formatMoney(item.val)}</p>
                     <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1 border-t border-slate-800 pt-1">
@@ -179,13 +179,13 @@ export default function AnalyticsBarChart({
 
                 {/* Bar Value on top for highest */}
                 {isHighest && !isHovered && (
-                  <span className="text-[10px] font-bold font-mono text-amber-600 mb-1 animate-pulse">
+                  <span className="text-[10px] font-bold font-mono text-amber-600 dark:text-amber-400 mb-1 animate-pulse">
                     Peak
                   </span>
                 )}
 
                 {/* Animated Bar Column */}
-                <div className="w-full max-w-[48px] rounded-t-2xl overflow-hidden bg-slate-100 flex flex-col justify-end transition-all duration-300 group-hover:scale-y-105">
+                <div className="w-full max-w-[48px] rounded-t-2xl overflow-hidden bg-black/5 dark:bg-white/10 flex flex-col justify-end transition-all duration-300 group-hover:scale-y-105">
                   <div
                     className={`w-full rounded-t-2xl transition-all duration-500 ${
                       isHighest
@@ -199,11 +199,11 @@ export default function AnalyticsBarChart({
                 {/* X-axis Label */}
                 <div className="mt-2 text-center">
                   <p className={`text-[11px] font-bold transition-colors ${
-                    isHovered ? "text-rose-600" : "text-slate-600"
+                    isHovered ? "text-rose-600 dark:text-rose-400" : "text-slate-700 dark:text-slate-300"
                   }`}>
                     {item.label}
                   </p>
-                  <p className="text-[10px] font-mono text-slate-400 hidden sm:block">
+                  <p className="text-[10px] font-mono text-slate-500 dark:text-slate-400 hidden sm:block">
                     {formatMoney(item.val)}
                   </p>
                 </div>
@@ -214,14 +214,14 @@ export default function AnalyticsBarChart({
       </div>
 
       {/* Bottom Insights Note */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-600 bg-amber-50/60 p-3.5 rounded-2xl border border-amber-200/50 gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-amber-900 dark:text-amber-200 bg-amber-500/10 p-3.5 rounded-2xl border border-amber-500/20 gap-2">
         <div className="flex items-center gap-2">
-          <Sparkles size={15} className="text-amber-600 shrink-0" />
+          <Sparkles size={15} className="text-amber-500 shrink-0" />
           <span>
             <strong>Growth Insight:</strong> Weekend dinner rushes drive 44% of total weekly volume. Enabling automated prep tickets reduces customer wait time by 12 minutes.
           </span>
         </div>
-        <span className="font-bold text-amber-800 shrink-0">
+        <span className="font-bold text-amber-700 dark:text-amber-300 shrink-0">
           Daily Target: {formatMoney(dailyTarget * baseScale)}
         </span>
       </div>

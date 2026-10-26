@@ -17,6 +17,7 @@ import SettingsModal, { KitchenSettings } from "@/components/SettingsModal";
 import SteamingFoodPlate from "@/components/SteamingFoodPlate";
 import AnalyticsBarChart from "@/components/AnalyticsBarChart";
 import SmokyBackground from "@/components/SmokyBackground";
+import ThemeToggle from "@/components/ThemeToggle";
 
 type OrderStatus = "pending" | "preparing" | "ready" | "delivered" | "cancelled";
 type Category = "rice" | "swallow" | "protein" | "snack" | "drink" | "soup" | "special";
@@ -98,11 +99,11 @@ const STATUS_CFG: Record<
   OrderStatus,
   { label: string; color: string; bg: string; border: string; icon: React.ReactNode }
 > = {
-  pending:   { label: "Pending",   color: "#b45309", bg: "#fef3c7", border: "#fde68a", icon: <Clock size={13} className="animate-spin text-amber-600" /> },
-  preparing: { label: "Preparing", color: "#2563eb", bg: "#dbeafe", border: "#bfdbfe", icon: <Flame size={13} className="text-blue-600 animate-pulse" /> },
-  ready:     { label: "Ready",     color: "#166534", bg: "#dcfce7", border: "#bbf7d0", icon: <CheckCircle2 size={13} className="text-emerald-600" /> },
-  delivered: { label: "Delivered", color: "#475569", bg: "#f1f5f9", border: "#e2e8f0", icon: <Check size={13} className="text-slate-600" /> },
-  cancelled: { label: "Cancelled", color: "#b91c1c", bg: "#fee2e2", border: "#fecaca", icon: <XCircle size={13} className="text-rose-600" /> },
+  pending:   { label: "Pending",   color: "#f59e0b", bg: "rgba(245, 158, 11, 0.15)", border: "rgba(245, 158, 11, 0.35)", icon: <Clock size={13} className="animate-spin text-amber-400" /> },
+  preparing: { label: "Preparing", color: "#facc15", bg: "rgba(234, 179, 8, 0.18)",  border: "rgba(250, 204, 21, 0.35)", icon: <Flame size={13} className="text-yellow-400 animate-pulse" /> },
+  ready:     { label: "Ready",     color: "#34d399", bg: "rgba(16, 185, 129, 0.18)", border: "rgba(52, 211, 153, 0.35)", icon: <CheckCircle2 size={13} className="text-emerald-400" /> },
+  delivered: { label: "Delivered", color: "#94a3b8", bg: "rgba(148, 163, 184, 0.15)", border: "rgba(148, 163, 184, 0.3)", icon: <Check size={13} className="text-slate-300" /> },
+  cancelled: { label: "Cancelled", color: "#f87171", bg: "rgba(239, 68, 68, 0.18)",  border: "rgba(248, 113, 113, 0.35)", icon: <XCircle size={13} className="text-rose-400" /> },
 };
 
 // Seed menu dishes
@@ -336,6 +337,10 @@ export default function ChopEasyApp({
     );
   };
 
+  const updateOrderStatus = (id: string, status: OrderStatus) => {
+    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
+  };
+
   const cancelOrder = (id: string) => {
     setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status: "cancelled" } : o)));
   };
@@ -436,9 +441,9 @@ export default function ChopEasyApp({
 
   // Otherwise, render full kitchen management dashboard
   return (
-    <div className="min-h-screen app-wallpaper flex flex-col relative selection:bg-rose-500 selection:text-white">
-      {/* ── TOP HEADER ── */}
-      <header className="sticky top-0 z-40 glass-header px-4 sm:px-6 py-3 transition-all">
+    <div className="min-h-screen app-wallpaper-inapp text-slate-900 dark:text-white flex flex-col relative selection:bg-rose-600 selection:text-white">
+      {/* ── TOP HEADER (GLASSMORPHIC RED & BLACK / LIGHT THEME) ── */}
+      <header className="sticky top-0 z-40 glass-header px-4 sm:px-6 py-3 transition-all border-b border-black/5 dark:border-white/10 backdrop-blur-2xl">
         <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-8 flex items-center justify-between gap-3">
           {/* Logo with click-to-home redirect */}
           <div className="flex items-center gap-3">
@@ -446,16 +451,16 @@ export default function ChopEasyApp({
               size="md"
               showTagline={true}
               onClick={() => setCurrentView("home")}
-              className="cursor-pointer"
+              className="cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95"
             />
 
             {currentUser && (
-              <div className="hidden lg:flex items-center gap-2 pl-4 border-l border-slate-200">
-                <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="text-xs font-semibold text-slate-700 truncate max-w-[160px]">
+              <div className="hidden lg:flex items-center gap-2 pl-4 border-l border-black/10 dark:border-white/15">
+                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate max-w-[160px]">
                   {currentUser.businessName}
                 </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold border border-amber-200">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-300 font-bold border border-rose-500/30">
                   Verified
                 </span>
               </div>
@@ -467,35 +472,38 @@ export default function ChopEasyApp({
             {/* Quick Home Switcher */}
             <button
               onClick={() => setCurrentView("home")}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-colors"
+              className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white glass-btn transition-all duration-200 cursor-pointer active:scale-95"
             >
               <ArrowLeft size={13} />
               <span>Back to Home</span>
             </button>
 
+            {/* Top Right Corner Light/Dark Theme Switcher */}
+            <ThemeToggle showLabel={true} />
+
             {/* Active Orders Count Badge */}
             {activeCount > 0 && (
-              <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 shadow-sm">
-                <Bell size={13} className="text-amber-700 animate-bounce" />
-                <span className="text-xs font-bold text-amber-800 font-mono">{activeCount} active</span>
+              <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-500/15 border border-rose-500/30 shadow-sm text-rose-600 dark:text-rose-300">
+                <Bell size={13} className="text-rose-500 dark:text-rose-400 animate-bounce" />
+                <span className="text-xs font-bold font-mono">{activeCount} active</span>
               </div>
             )}
 
             {/* Store Open/Closed Toggle */}
             <button
               onClick={() => setIsOpen((o) => !o)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shadow-sm ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border transition-all duration-200 cursor-pointer shadow-sm active:scale-95 ${
                 isOpen ? "status-open" : "status-closed"
               }`}
             >
-              <span className={`w-2 h-2 rounded-full ${isOpen ? "bg-emerald-500" : "bg-rose-500"} animate-pulse`} />
+              <span className={`w-2 h-2 rounded-full ${isOpen ? "bg-emerald-400" : "bg-rose-500"} animate-pulse`} />
               <span>{isOpen ? "Store Open" : "Store Closed"}</span>
             </button>
 
             {/* New Order CTA */}
             <button
               onClick={() => setShowNewOrder(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 text-white text-xs sm:text-sm font-bold hover:from-rose-700 hover:to-amber-600 active:scale-95 transition-all shadow-md shadow-rose-500/25"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 via-rose-500 to-red-600 text-white text-xs sm:text-sm font-bold hover:from-rose-500 hover:to-red-600 active:scale-95 transition-all duration-300 shadow-lg shadow-rose-950/60 border border-rose-400/30 cursor-pointer"
             >
               <Plus size={16} /> <span>New Order</span>
             </button>
@@ -506,24 +514,24 @@ export default function ChopEasyApp({
                 <div>
                   <button
                     onClick={() => setShowProfileMenu(!showProfileMenu)}
-                    className="flex items-center gap-2 p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:border-slate-300 transition-all text-xs font-semibold shadow-sm"
+                    className="flex items-center gap-2 p-1.5 sm:px-3 sm:py-1.5 rounded-xl glass-btn text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-all text-xs font-semibold shadow-sm cursor-pointer"
                   >
-                    <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-rose-600 to-amber-500 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                    <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-rose-600 to-red-700 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-sm">
                       {currentUser.name.charAt(0)}
                     </div>
                     <span className="hidden sm:inline font-bold truncate max-w-[100px]">
                       {currentUser.name.split(" ")[0]}
                     </span>
-                    <ChevronDown size={14} className="text-slate-400" />
+                    <ChevronDown size={14} className="text-slate-500 dark:text-slate-400" />
                   </button>
 
                   {/* Profile Dropdown */}
                   {showProfileMenu && (
-                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 z-50 animate-in fade-in duration-150">
-                      <div className="p-3 border-b border-slate-100 bg-slate-50/60 rounded-xl mb-1">
-                        <p className="font-bold text-xs text-slate-900 truncate">{currentUser.name}</p>
-                        <p className="text-[11px] text-slate-500 truncate">{currentUser.email}</p>
-                        <p className="text-[11px] font-semibold text-rose-600 mt-1 flex items-center gap-1">
+                    <div className="absolute right-0 mt-2 w-64 bg-white/95 dark:bg-[#0d0e15]/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-black/10 dark:border-white/10 p-2 z-50 animate-in fade-in duration-150 text-slate-900 dark:text-white">
+                      <div className="p-3 border-b border-black/5 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.04] rounded-xl mb-1">
+                        <p className="font-bold text-xs text-slate-900 dark:text-white truncate">{currentUser.name}</p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{currentUser.email}</p>
+                        <p className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 mt-1 flex items-center gap-1">
                           <Store size={12} /> {currentUser.businessName}
                         </p>
                       </div>
@@ -534,9 +542,9 @@ export default function ChopEasyApp({
                           setShowProfileMenu(false);
                           setShowSettingsModal(true);
                         }}
-                        className="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-700 font-bold hover:bg-slate-50 flex items-center gap-2 transition-colors"
+                        className="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-700 dark:text-slate-200 font-bold hover:bg-black/5 dark:hover:bg-white/10 flex items-center gap-2 transition-colors cursor-pointer"
                       >
-                        <Settings size={14} className="text-slate-500" /> Profile & Kitchen Settings
+                        <Settings size={14} className="text-slate-500 dark:text-slate-400" /> Profile & Kitchen Settings
                       </button>
 
                       <button
@@ -545,9 +553,9 @@ export default function ChopEasyApp({
                           setAuthInitialMode("login");
                           setShowAuthModal(true);
                         }}
-                        className="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-600 hover:bg-slate-50 flex items-center gap-2 transition-colors"
+                        className="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-600 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10 flex items-center gap-2 transition-colors cursor-pointer"
                       >
-                        <LogIn size={14} className="text-slate-400" /> Switch Account / Re-login
+                        <LogIn size={14} className="text-slate-500 dark:text-slate-400" /> Switch Account / Re-login
                       </button>
 
                       <button
@@ -555,19 +563,19 @@ export default function ChopEasyApp({
                           setShowProfileMenu(false);
                           setShowTermsModal(true);
                         }}
-                        className="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-600 hover:bg-slate-50 flex items-center gap-2 transition-colors"
+                        className="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-600 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10 flex items-center gap-2 transition-colors cursor-pointer"
                       >
-                        <ShieldCheck size={14} className="text-slate-400" /> Terms of Service
+                        <ShieldCheck size={14} className="text-slate-500 dark:text-slate-400" /> Terms of Service
                       </button>
 
-                      <div className="border-t border-slate-100 my-1" />
+                      <div className="border-t border-black/5 dark:border-white/10 my-1" />
 
                       <button
                         onClick={() => {
                           setCurrentUser(null);
                           setShowProfileMenu(false);
                         }}
-                        className="w-full text-left px-3 py-2 rounded-xl text-xs text-rose-600 font-bold hover:bg-rose-50 flex items-center gap-2 transition-colors"
+                        className="w-full text-left px-3 py-2 rounded-xl text-xs text-rose-600 dark:text-rose-400 font-bold hover:bg-rose-500/15 flex items-center gap-2 transition-colors cursor-pointer"
                       >
                         <LogOut size={14} /> Sign Out
                       </button>
@@ -581,7 +589,7 @@ export default function ChopEasyApp({
                       setAuthInitialMode("login");
                       setShowAuthModal(true);
                     }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-50 transition-all shadow-sm"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl glass-btn text-slate-700 dark:text-white text-xs font-bold hover:bg-black/5 dark:hover:bg-white/15 transition-all shadow-sm cursor-pointer"
                   >
                     <LogIn size={14} /> <span>Sign In</span>
                   </button>
@@ -590,7 +598,7 @@ export default function ChopEasyApp({
                       setAuthInitialMode("register");
                       setShowAuthModal(true);
                     }}
-                    className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-all shadow-sm"
+                    className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-700 text-white text-xs font-bold hover:from-rose-500 hover:to-red-600 transition-all shadow-sm border border-rose-400/30 cursor-pointer"
                   >
                     <UserPlus size={14} /> <span>Register</span>
                   </button>
@@ -601,10 +609,10 @@ export default function ChopEasyApp({
         </div>
       </header>
 
-      {/* ── SUBNAV TABS & SEARCH ── */}
-      <div className="sticky top-[58px] z-30 glass-subnav px-4 sm:px-6 lg:px-8 xl:px-12">
+      {/* ── SUBNAV TABS & SEARCH (GLASSMORPHIC) ── */}
+      <div className="sticky top-[58px] z-30 glass-subnav px-4 sm:px-6 lg:px-8 xl:px-12 border-b border-black/5 dark:border-white/10 backdrop-blur-2xl">
         <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          {/* Main Module Tabs */}
+          {/* Main Module Tabs with Smooth Transition */}
           <div className="flex gap-2 overflow-x-auto scrollbar-none">
             {[
               { id: "orders", label: "Live Orders", count: activeCount, icon: <ShoppingBag size={15} /> },
@@ -614,10 +622,10 @@ export default function ChopEasyApp({
               <button
                 key={t.id}
                 onClick={() => setTab(t.id as Tab)}
-                className={`flex items-center gap-2 px-4 py-3 text-xs sm:text-sm font-bold transition-all border-b-2 shrink-0 cursor-pointer ${
+                className={`flex items-center gap-2 px-4 py-3 text-xs sm:text-sm font-bold transition-all duration-300 border-b-2 shrink-0 cursor-pointer ${
                   tab === t.id
-                    ? "border-rose-600 text-rose-600 bg-rose-50/50"
-                    : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
+                    ? "border-rose-500 text-rose-600 dark:text-rose-400 bg-rose-500/10"
+                    : "border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-black/10 dark:hover:border-white/20"
                 }`}
               >
                 {t.icon}
@@ -625,7 +633,7 @@ export default function ChopEasyApp({
                 {t.count !== null && (
                   <span
                     className={`px-1.5 py-0.5 rounded-full text-[11px] font-mono ${
-                      tab === t.id ? "bg-rose-600 text-white" : "bg-slate-200/80 text-slate-600"
+                      tab === t.id ? "bg-rose-600 text-white" : "bg-black/5 dark:bg-white/10 text-slate-700 dark:text-slate-300"
                     }`}
                   >
                     {t.count}
@@ -635,7 +643,7 @@ export default function ChopEasyApp({
             ))}
           </div>
 
-          {/* Search box for orders & dishes */}
+          {/* Search box for orders & dishes with glassmorphism */}
           <div className="relative py-1.5 sm:py-0 w-full sm:w-80">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -643,12 +651,12 @@ export default function ChopEasyApp({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search dishes, tickets, customers..."
-              className="w-full bg-white/90 border border-slate-200 rounded-xl pl-8 pr-8 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-500 transition-all shadow-xs"
+              className="w-full bg-black/[0.04] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 rounded-xl pl-8 pr-8 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-rose-500 focus:bg-white dark:focus:bg-white/[0.1] transition-all shadow-xs"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-white"
               >
                 <X size={12} />
               </button>
@@ -706,11 +714,11 @@ export default function ChopEasyApp({
           </div>
         </div>
 
-        {/* Circular Category Strip (Inspired by Modern Food App Concept) */}
+        {/* Circular Category Strip with Dark Glassmorphism */}
         <div className="space-y-2 pt-1">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Quick Category Filter</span>
-            <span className="text-xs text-slate-500 font-mono">
+            <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Quick Category Filter</span>
+            <span className="text-xs text-slate-400 font-mono">
               {menu.filter((m) => selectedCategory === "all" || m.category === selectedCategory).length} items
             </span>
           </div>
@@ -728,20 +736,20 @@ export default function ChopEasyApp({
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id as any)}
-                className="flex flex-col items-center gap-1.5 shrink-0 group cursor-pointer"
+                className="flex flex-col items-center gap-1.5 shrink-0 group cursor-pointer transition-transform duration-200 hover:scale-105"
               >
                 <div
-                  className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-2xl transition-all ${
+                  className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-2xl transition-all duration-300 ${
                     selectedCategory === cat.id
-                      ? "bg-gradient-to-tr from-rose-600 to-amber-500 text-white ring-4 ring-rose-500/25 scale-105 shadow-md"
-                      : "bg-white border-2 border-slate-200/90 text-slate-700 hover:border-amber-400 group-hover:scale-105 shadow-xs"
+                      ? "bg-gradient-to-tr from-rose-600 via-red-600 to-amber-500 text-white ring-4 ring-rose-500/35 scale-105 shadow-xl shadow-rose-950/70"
+                      : "bg-[#11121d]/80 backdrop-blur-xl border border-white/10 text-slate-200 hover:border-rose-500/50 hover:bg-white/10 shadow-lg"
                   }`}
                 >
                   {cat.emoji}
                 </div>
                 <span
                   className={`text-[11px] sm:text-xs font-bold transition-colors ${
-                    selectedCategory === cat.id ? "text-rose-600 font-extrabold" : "text-slate-600"
+                    selectedCategory === cat.id ? "text-rose-400 font-black" : "text-slate-400 group-hover:text-white"
                   }`}
                 >
                   {cat.label}
@@ -763,10 +771,10 @@ export default function ChopEasyApp({
                     <button
                       key={s}
                       onClick={() => setFilterStatus(s)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold capitalize transition-all border shadow-sm ${
+                      className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold capitalize transition-all duration-200 cursor-pointer ${
                         isCurrent
-                          ? "bg-slate-900 text-white border-slate-900"
-                          : "bg-white/80 text-slate-600 border-slate-200/80 hover:bg-white hover:border-slate-300"
+                          ? "glass-pill-active"
+                          : "glass-pill text-slate-300 hover:text-white"
                       }`}
                     >
                       {s === "all" ? (
@@ -779,7 +787,7 @@ export default function ChopEasyApp({
                       )}
                       <span
                         className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                          isCurrent ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
+                          isCurrent ? "bg-white/20 text-white" : "bg-white/10 text-slate-300"
                         }`}
                       >
                         {count}
@@ -789,12 +797,12 @@ export default function ChopEasyApp({
                 })}
               </div>
 
-              <div className="text-xs text-slate-500 font-medium hidden sm:block">
-                Showing <span className="font-bold text-slate-800">{filteredOrders.length}</span> of {orders.length} orders
+              <div className="text-xs text-slate-400 font-medium hidden sm:block">
+                Showing <span className="font-bold text-white">{filteredOrders.length}</span> of {orders.length} orders
               </div>
             </div>
 
-            {/* Orders Grid (Full-Width Fluid Responsive Layout) */}
+            {/* Orders Grid (Glassmorphed Cards with Custom Ready, Preparing, and Cancel Buttons) */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
               {filteredOrders.map((order) => {
                 const cfg = STATUS_CFG[order.status];
@@ -803,15 +811,15 @@ export default function ChopEasyApp({
                 return (
                   <div
                     key={order.id}
-                    className={`glass-panel glass-panel-interactive rounded-3xl p-5 flex flex-col justify-between transition-all relative ${
-                      isActive ? "ring-1 ring-amber-300/40" : ""
+                    className={`glass-card-dark rounded-3xl p-5 flex flex-col justify-between transition-all duration-300 relative border border-black/5 dark:border-white/10 hover:border-rose-500/40 text-slate-900 dark:text-white shadow-xl ${
+                      isActive ? "ring-1 ring-rose-500/30" : ""
                     }`}
                   >
                     <div>
                       <div className="flex items-start justify-between gap-2 mb-3">
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-mono font-extrabold text-rose-600 text-sm">
+                            <span className="font-mono font-extrabold text-rose-600 dark:text-rose-400 text-sm">
                               {order.orderNo}
                             </span>
                             <span
@@ -827,25 +835,25 @@ export default function ChopEasyApp({
                             </span>
                           </div>
 
-                          <h4 className="font-display font-bold text-slate-900 text-base mt-1 leading-snug">
+                          <h4 className="font-display font-extrabold text-slate-900 dark:text-white text-base mt-1.5 leading-snug">
                             {order.customerName}
                           </h4>
 
-                          <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+                          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-1">
                             <span className="inline-flex items-center gap-1 font-medium">
                               {order.channel === "walkin" && (
                                 <>
-                                  <Footprints size={12} className="text-amber-600" /> Walk-in
+                                  <Footprints size={12} className="text-amber-500" /> Walk-in
                                 </>
                               )}
                               {order.channel === "whatsapp" && (
                                 <>
-                                  <MessageCircle size={12} className="text-emerald-600" /> WhatsApp
+                                  <MessageCircle size={12} className="text-emerald-500" /> WhatsApp
                                 </>
                               )}
                               {order.channel === "call" && (
                                 <>
-                                  <Phone size={12} className="text-blue-600" /> Phone Call
+                                  <Phone size={12} className="text-blue-500" /> Phone Call
                                 </>
                               )}
                             </span>
@@ -855,26 +863,26 @@ export default function ChopEasyApp({
                         </div>
 
                         <div className="text-right shrink-0">
-                          <p className="font-display font-extrabold text-xl text-slate-900 tracking-tight">
+                          <p className="font-display font-black text-xl text-slate-900 dark:text-white tracking-tight">
                             {formatMoney(order.total)}
                           </p>
-                          <p className="text-[11px] text-slate-400 font-medium">
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                             {order.items.reduce((s, i) => s + i.qty, 0)} items
                           </p>
                         </div>
                       </div>
 
-                      <div className="bg-slate-50/70 border border-slate-100 rounded-2xl p-3.5 space-y-1.5 mb-3.5">
+                      <div className="bg-black/[0.03] dark:bg-white/[0.04] border border-black/5 dark:border-white/10 rounded-2xl p-3.5 space-y-1.5 mb-3.5">
                         {order.items.map((item) => (
                           <div
                             key={item.menuItemId}
-                            className="flex justify-between items-center text-xs text-slate-700"
+                            className="flex justify-between items-center text-xs text-slate-700 dark:text-slate-200"
                           >
                             <span className="font-medium">
-                              <span className="text-rose-600 font-bold mr-1">{item.qty}×</span>
+                              <span className="text-rose-600 dark:text-rose-400 font-bold mr-1">{item.qty}×</span>
                               {item.name}
                             </span>
-                            <span className="font-mono text-slate-500 font-semibold">
+                            <span className="font-mono text-amber-600 dark:text-amber-400 font-semibold">
                               {formatMoney(item.qty * item.unitPrice)}
                             </span>
                           </div>
@@ -882,55 +890,68 @@ export default function ChopEasyApp({
                       </div>
 
                       {order.note && (
-                        <div className="p-2.5 rounded-xl bg-amber-50/90 border border-amber-200/80 text-[11px] text-amber-900 font-medium flex items-start gap-1.5 mb-3.5">
+                        <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-700 dark:text-amber-300 font-medium flex items-start gap-1.5 mb-3.5">
                           <span className="shrink-0">📝</span>
                           <span>{order.note}</span>
                         </div>
                       )}
                     </div>
 
-                    {/* Order action workflow */}
+                    {/* Order action workflow: Ready (Green), Preparing (Yellow), Cancel (Red) */}
                     {isActive ? (
-                      <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-                        <button
-                          onClick={() => advanceOrder(order.id)}
-                          className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-white transition-all shadow-sm flex items-center justify-center gap-1.5 ${
-                            order.status === "pending"
-                              ? "bg-blue-600 hover:bg-blue-700 shadow-blue-500/20"
-                              : order.status === "preparing"
-                              ? "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20"
-                              : "bg-slate-800 hover:bg-slate-900"
-                          }`}
-                        >
-                          {order.status === "pending" && (
-                            <>
-                              <Flame size={14} /> Start Preparing
-                            </>
-                          )}
-                          {order.status === "preparing" && (
-                            <>
-                              <CheckCircle2 size={14} /> Mark Ready
-                            </>
-                          )}
-                          {order.status === "ready" && (
-                            <>
-                              <Check size={14} /> Mark Delivered
-                            </>
-                          )}
-                        </button>
+                      <div className="flex items-center gap-2 pt-3 border-t border-white/10">
+                        {order.status === "pending" && (
+                          <>
+                            <button
+                              onClick={() => updateOrderStatus(order.id, "preparing")}
+                              className="btn-preparing flex-1 py-2.5 px-3 rounded-xl text-xs font-black transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer shadow-md hover:scale-[1.02] active:scale-95"
+                            >
+                              <Flame size={14} className="animate-pulse" />
+                              <span>Start Preparing</span>
+                            </button>
+                            <button
+                              onClick={() => updateOrderStatus(order.id, "ready")}
+                              title="Mark directly as Ready (Green)"
+                              className="btn-ready py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1 cursor-pointer shadow-md hover:scale-[1.02] active:scale-95"
+                            >
+                              <CheckCircle2 size={14} />
+                              <span className="hidden sm:inline">Ready</span>
+                            </button>
+                          </>
+                        )}
+
+                        {order.status === "preparing" && (
+                          <button
+                            onClick={() => advanceOrder(order.id)}
+                            className="btn-ready flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer shadow-md hover:scale-[1.02] active:scale-95"
+                          >
+                            <CheckCircle2 size={14} />
+                            <span>Mark Ready</span>
+                          </button>
+                        )}
+
+                        {order.status === "ready" && (
+                          <button
+                            onClick={() => advanceOrder(order.id)}
+                            className="bg-[#1e202e] hover:bg-[#282a3d] text-slate-100 border border-white/20 flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.02] active:scale-95 shadow-md"
+                          >
+                            <Check size={14} />
+                            <span>Mark Delivered</span>
+                          </button>
+                        )}
 
                         <button
                           onClick={() => cancelOrder(order.id)}
-                          title="Cancel Order"
-                          className="p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-colors"
+                          title="Reject or Cancel Order (Red)"
+                          className="btn-cancel p-2.5 rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center shadow-md shrink-0 hover:scale-[1.05] active:scale-95"
                         >
                           <XCircle size={16} />
                         </button>
                       </div>
                     ) : (
-                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-                        <span>Status: {cfg.label}</span>
-                        <span className="font-mono text-[10px]">{order.customerPhone}</span>
+                      <div className="pt-2.5 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+                        <span>Status: <strong className="text-white">{cfg.label}</strong></span>
+                        <span className="font-mono text-[10px] text-slate-400">{order.customerPhone}</span>
                       </div>
                     )}
                   </div>
@@ -938,21 +959,21 @@ export default function ChopEasyApp({
               })}
 
               {filteredOrders.length === 0 && (
-                <div className="col-span-full glass-panel rounded-3xl p-12 text-center">
-                  <div className="w-16 h-16 rounded-3xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-4 shadow-sm">
+                <div className="col-span-full glass-card-dark rounded-3xl p-12 text-center border border-white/10">
+                  <div className="w-16 h-16 rounded-3xl bg-rose-500/15 text-rose-400 border border-rose-500/30 flex items-center justify-center mx-auto mb-4 shadow-sm">
                     <ShoppingBag size={30} />
                   </div>
-                  <h3 className="font-display font-bold text-xl text-slate-800 mb-1">
+                  <h3 className="font-display font-bold text-xl text-white mb-1">
                     No matching orders
                   </h3>
-                  <p className="text-xs text-slate-500 max-w-sm mx-auto mb-5">
+                  <p className="text-xs text-slate-400 max-w-sm mx-auto mb-5">
                     {searchQuery
                       ? `No orders found matching "${searchQuery}". Clear your search query or filters.`
                       : "No orders in this status category. Click '+ New Order' to take an order."}
                   </p>
                   <button
                     onClick={() => setShowNewOrder(true)}
-                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 text-white font-bold text-xs shadow-md shadow-rose-500/20 hover:from-rose-700 hover:to-amber-600 transition-all"
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 via-rose-500 to-red-600 text-white font-bold text-xs shadow-lg shadow-rose-950/60 hover:from-rose-500 hover:to-red-600 border border-rose-400/30 transition-all cursor-pointer"
                   >
                     + Place New Customer Order
                   </button>
@@ -967,11 +988,11 @@ export default function ChopEasyApp({
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h2 className="font-display font-extrabold text-2xl text-slate-900 tracking-tight">
+                <h2 className="font-display font-extrabold text-2xl text-white tracking-tight">
                   Featured Dishes & Kitchen Catalog
                 </h2>
-                <p className="text-xs text-slate-500">
-                  <span className="font-bold text-emerald-600">
+                <p className="text-xs text-slate-400">
+                  <span className="font-bold text-emerald-400">
                     {filteredMenu.filter((m) => m.available).length} of {filteredMenu.length}
                   </span>{" "}
                   dishes currently available for customers · Click toggle to mark sold-out
@@ -980,24 +1001,24 @@ export default function ChopEasyApp({
 
               <button
                 onClick={() => setShowNewItem(true)}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-bold hover:bg-slate-800 transition-all shadow-md shadow-slate-900/10 cursor-pointer"
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-700 text-white text-xs sm:text-sm font-bold hover:from-rose-500 hover:to-red-600 transition-all shadow-lg shadow-rose-950/60 border border-rose-400/30 cursor-pointer"
               >
                 <Plus size={16} /> Add Menu Item
               </button>
             </div>
 
-            {/* Featured Dishes Card Grid (Full-Width Responsive) */}
+            {/* Featured Dishes Card Grid (Glassmorphic Theme) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-5">
               {filteredMenu.map((item) => (
                 <div
                   key={item.id}
-                  className={`group rounded-3xl bg-white/90 backdrop-blur-md border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col justify-between ${
-                    !item.available ? "opacity-60 bg-slate-50" : ""
+                  className={`group rounded-3xl glass-card-dark border border-black/5 dark:border-white/10 shadow-xl hover:border-rose-500/40 transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col justify-between text-slate-900 dark:text-white ${
+                    !item.available ? "opacity-50" : ""
                   }`}
                 >
                   <div>
                     {/* Dish Photo Container */}
-                    <div className="relative w-full aspect-[4/3] overflow-hidden bg-slate-100">
+                    <div className="relative w-full aspect-[4/3] overflow-hidden bg-slate-900">
                       {item.image ? (
                         <img
                           src={item.image}
@@ -1005,14 +1026,14 @@ export default function ChopEasyApp({
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-slate-100 text-5xl">
+                        <div className="w-full h-full flex items-center justify-center bg-black/5 dark:bg-white/[0.03] text-5xl">
                           {item.emoji}
                         </div>
                       )}
 
                       {/* Category Badge & Bestseller on Photo */}
                       <div className="absolute top-3 left-3 flex items-center gap-1.5">
-                        <span className="px-2.5 py-1 rounded-full bg-slate-950/75 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider shadow-xs">
+                        <span className="px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider border border-white/10 shadow-xs">
                           {item.category}
                         </span>
                         {item.bestseller && (
@@ -1039,32 +1060,32 @@ export default function ChopEasyApp({
                     {/* Dish Details */}
                     <div className="p-4 space-y-2">
                       <div className="flex items-center justify-between text-xs">
-                        <h3 className="font-display font-bold text-sm text-slate-900 truncate">
+                        <h3 className="font-display font-bold text-sm text-slate-900 dark:text-white truncate">
                           {item.name}
                         </h3>
-                        <span className="flex items-center gap-0.5 text-[11px] font-bold text-amber-500">
+                        <span className="flex items-center gap-0.5 text-[11px] font-bold text-amber-500 dark:text-amber-400">
                           <Star size={12} fill="#f59e0b" /> 4.9
                         </span>
                       </div>
 
                       <div className="flex items-baseline justify-between pt-1">
-                        <span className="font-mono font-black text-base text-rose-600">
+                        <span className="font-mono font-black text-base text-rose-600 dark:text-rose-400">
                           {formatMoney(item.price)}
                         </span>
-                        <span className="text-[11px] text-slate-400 font-medium">Standard plate</span>
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Standard plate</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Actions Bar */}
-                  <div className="px-4 pb-4 pt-2 border-t border-slate-100/90 flex items-center justify-between gap-2">
+                  <div className="px-4 pb-4 pt-2.5 border-t border-black/5 dark:border-white/10 flex items-center justify-between gap-2">
                     <button
                       onClick={() => toggleAvailable(item.id)}
                       title={item.available ? "Click to mark sold out" : "Click to mark available"}
-                      className={`text-[11px] font-bold px-2.5 py-1.5 rounded-xl border transition-colors ${
+                      className={`text-[11px] font-bold px-2.5 py-1.5 rounded-xl border transition-colors cursor-pointer ${
                         item.available
-                          ? "bg-slate-100 text-slate-700 border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200"
-                          : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                          ? "bg-black/5 dark:bg-white/10 text-slate-700 dark:text-slate-300 border-black/10 dark:border-white/15 hover:bg-rose-500/15 hover:text-rose-600 dark:hover:text-rose-300 hover:border-rose-500/40"
+                          : "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30"
                       }`}
                     >
                       {item.available ? "Mark Sold Out" : "Mark Available"}
@@ -1076,7 +1097,7 @@ export default function ChopEasyApp({
                         setShowNewOrder(true);
                       }}
                       disabled={!item.available}
-                      className="flex-1 py-1.5 px-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 text-white font-bold text-xs shadow-xs hover:from-rose-700 hover:to-amber-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-1 cursor-pointer"
+                      className="flex-1 py-1.5 px-3 rounded-xl bg-gradient-to-r from-rose-600 to-red-700 text-white font-bold text-xs shadow-md shadow-rose-950/50 hover:from-rose-500 hover:to-red-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-1 cursor-pointer border border-rose-400/30"
                     >
                       <Plus size={13} />
                       <span>Add</span>
@@ -1127,10 +1148,10 @@ export default function ChopEasyApp({
         {tab === "analytics" && (
           <div className="space-y-6">
             <div>
-              <h2 className="font-display font-extrabold text-2xl text-slate-900 tracking-tight">
+              <h2 className="font-display font-extrabold text-2xl text-white tracking-tight">
                 Sales & Performance Analytics
               </h2>
-              <p className="text-xs text-slate-500">Real-time revenue, order volume, and food trends</p>
+              <p className="text-xs text-slate-400">Real-time revenue, order volume, and kitchen efficiency trends</p>
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1153,28 +1174,28 @@ export default function ChopEasyApp({
                   label: "Average Order Value",
                   value: formatMoney(analytics.avgOrder),
                   sub: "Per completed checkout",
-                  color: "#059669",
+                  color: "#10b981",
                   icon: <TrendingUp size={20} />,
                 },
                 {
                   label: "Available Menu Items",
                   value: String(menu.filter((m) => m.available).length),
                   sub: `Out of ${menu.length} total dishes`,
-                  color: "#7c3aed",
+                  color: "#a855f7",
                   icon: <Package size={20} />,
                 },
               ].map((stat) => (
-                <div key={stat.label} className="glass-panel rounded-3xl p-5 relative overflow-hidden shadow-sm">
+                <div key={stat.label} className="glass-card-dark rounded-3xl p-5 relative overflow-hidden border border-white/10 shadow-2xl text-white">
                   <div
-                    className="w-10 h-10 rounded-2xl mb-3 flex items-center justify-center"
-                    style={{ backgroundColor: stat.color + "18", color: stat.color }}
+                    className="w-10 h-10 rounded-2xl mb-3 flex items-center justify-center border border-white/10 shadow-xs"
+                    style={{ backgroundColor: stat.color + "22", color: stat.color }}
                   >
                     {stat.icon}
                   </div>
-                  <p className="font-display font-black text-2xl sm:text-3xl text-slate-900 leading-none">
+                  <p className="font-display font-black text-2xl sm:text-3xl text-white leading-none">
                     {stat.value}
                   </p>
-                  <p className="text-xs font-bold text-slate-700 mt-2">{stat.label}</p>
+                  <p className="text-xs font-bold text-slate-300 mt-2">{stat.label}</p>
                   <p className="text-[11px] text-slate-400">{stat.sub}</p>
                 </div>
               ))}
@@ -1188,16 +1209,16 @@ export default function ChopEasyApp({
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="glass-panel rounded-3xl p-6 shadow-sm">
+              <div className="glass-card-dark rounded-3xl p-6 border border-black/5 dark:border-white/10 shadow-2xl text-slate-900 dark:text-white">
                 <div className="flex items-center gap-2 mb-4">
-                  <Star size={18} className="text-amber-500 fill-amber-500" />
-                  <h3 className="font-display font-bold text-lg text-slate-900">
+                  <Star size={18} className="text-amber-400 fill-amber-400" />
+                  <h3 className="font-display font-bold text-lg text-slate-900 dark:text-white">
                     Top Selling Dishes
                   </h3>
                 </div>
 
                 {analytics.topSorted.length === 0 ? (
-                  <p className="text-xs text-slate-400 py-4">No completed orders yet.</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 py-4">No completed orders yet.</p>
                 ) : (
                   <div className="space-y-4">
                     {analytics.topSorted.map(([name, qty], idx) => {
@@ -1205,14 +1226,14 @@ export default function ChopEasyApp({
                       return (
                         <div key={name}>
                           <div className="flex justify-between text-xs mb-1.5">
-                            <span className="font-bold text-slate-800">
+                            <span className="font-bold text-slate-800 dark:text-slate-200">
                               {idx + 1}. {name}
                             </span>
-                            <span className="font-mono font-bold text-rose-600">{qty} sold</span>
+                            <span className="font-mono font-bold text-rose-600 dark:text-rose-400">{qty} sold</span>
                           </div>
-                          <div className="h-2.5 rounded-full bg-slate-100 overflow-hidden">
+                          <div className="h-2.5 rounded-full bg-black/5 dark:bg-white/10 overflow-hidden">
                             <div
-                              className="h-full rounded-full bg-gradient-to-r from-rose-600 to-amber-500 transition-all duration-500"
+                              className="h-full rounded-full bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500 transition-all duration-500"
                               style={{ width: `${(qty / maxQty) * 100}%` }}
                             />
                           </div>
@@ -1223,11 +1244,11 @@ export default function ChopEasyApp({
                 )}
               </div>
 
-              <div className="glass-panel rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+              <div className="glass-card-dark rounded-3xl p-6 border border-black/5 dark:border-white/10 shadow-2xl text-slate-900 dark:text-white flex flex-col justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-4">
-                    <Users size={18} className="text-emerald-600" />
-                    <h3 className="font-display font-bold text-lg text-slate-900">
+                    <Users size={18} className="text-rose-500 dark:text-rose-400" />
+                    <h3 className="font-display font-bold text-lg text-slate-900 dark:text-white">
                       Orders by Intake Channel
                     </h3>
                   </div>
@@ -1235,7 +1256,7 @@ export default function ChopEasyApp({
                   <div className="space-y-3.5">
                     {[
                       { key: "walkin", label: "Walk-in Counter", color: "#e11d48", icon: <Footprints size={14} /> },
-                      { key: "whatsapp", label: "WhatsApp Direct", color: "#059669", icon: <MessageCircle size={14} /> },
+                      { key: "whatsapp", label: "WhatsApp Direct", color: "#10b981", icon: <MessageCircle size={14} /> },
                       { key: "call", label: "Phone Call Orders", color: "#f59e0b", icon: <Phone size={14} /> },
                     ].map((ch) => {
                       const count = analytics.byChannel[ch.key as keyof typeof analytics.byChannel];
@@ -1244,14 +1265,14 @@ export default function ChopEasyApp({
                       return (
                         <div key={ch.key}>
                           <div className="flex justify-between items-center text-xs mb-1">
-                            <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                            <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                               {ch.icon} {ch.label}
                             </span>
-                            <span className="text-slate-500 font-mono">
+                            <span className="text-slate-500 dark:text-slate-400 font-mono">
                               {count} ({pct}%)
                             </span>
                           </div>
-                          <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                          <div className="h-2 rounded-full bg-black/5 dark:bg-white/10 overflow-hidden">
                             <div
                               className="h-full rounded-full transition-all duration-500"
                               style={{ width: `${pct}%`, backgroundColor: ch.color }}
@@ -1263,15 +1284,15 @@ export default function ChopEasyApp({
                   </div>
                 </div>
 
-                <div className="mt-5 p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/60 text-xs text-amber-900 leading-relaxed">
+                <div className="mt-5 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-700 dark:text-amber-300 leading-relaxed">
                   💡 <span className="font-bold">Pro Growth Tip:</span> High-volume food vendors report 65% of repeat orders originate from WhatsApp. Share your live ChopEasy catalog link in your profile bio!
                 </div>
               </div>
             </div>
 
             {/* Pipeline revenue breakdown */}
-            <div className="glass-panel rounded-3xl p-6 shadow-sm">
-              <h3 className="font-display font-bold text-lg text-slate-900 mb-4">
+            <div className="glass-card-dark rounded-3xl p-6 border border-black/5 dark:border-white/10 shadow-2xl text-slate-900 dark:text-white">
+              <h3 className="font-display font-bold text-lg text-slate-900 dark:text-white mb-4">
                 Pipeline Value Breakdown
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -1307,16 +1328,16 @@ export default function ChopEasyApp({
 
       {/* ── NEW ORDER MODAL ── */}
       {showNewOrder && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 max-h-[92vh] flex flex-col border border-rose-100 shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 flex-shrink-0">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 dark:bg-black/80 backdrop-blur-xl animate-in fade-in duration-200">
+          <div className="bg-white/95 dark:bg-[#0c0d12]/95 text-slate-900 dark:text-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 max-h-[92vh] flex flex-col border border-slate-200/80 dark:border-white/10 shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 dark:border-white/10 flex-shrink-0">
               <div>
-                <h3 className="font-display font-bold text-2xl text-slate-900">New Order</h3>
-                <p className="text-xs text-rose-600 font-mono font-bold">{orderNo}</p>
+                <h3 className="font-display font-bold text-2xl text-slate-900 dark:text-white">New Order</h3>
+                <p className="text-xs text-rose-500 dark:text-rose-400 font-mono font-bold">{orderNo}</p>
               </div>
               <button
                 onClick={() => setShowNewOrder(false)}
-                className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
               >
                 <X size={20} />
               </button>
@@ -1325,7 +1346,7 @@ export default function ChopEasyApp({
             <div className="overflow-y-auto flex-1 space-y-4 py-4 pr-1">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                     Customer Name *
                   </label>
                   <input
@@ -1333,11 +1354,11 @@ export default function ChopEasyApp({
                     value={orderForm.customerName}
                     onChange={(e) => setOrderForm((f) => ({ ...f, customerName: e.target.value }))}
                     placeholder="e.g. Tunde Badmus"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                    className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-white/[0.08] focus:outline-none focus:border-rose-500 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                     Phone Number
                   </label>
                   <input
@@ -1345,13 +1366,13 @@ export default function ChopEasyApp({
                     value={orderForm.customerPhone}
                     onChange={(e) => setOrderForm((f) => ({ ...f, customerPhone: e.target.value }))}
                     placeholder="080XXXXXXXX"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                    className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-white/[0.08] focus:outline-none focus:border-rose-500 transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 block">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 block">
                   Intake Channel
                 </label>
                 <div className="flex gap-2">
@@ -1364,10 +1385,10 @@ export default function ChopEasyApp({
                       key={ch}
                       type="button"
                       onClick={() => setOrderForm((f) => ({ ...f, channel: ch as Order["channel"] }))}
-                      className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all border ${
+                      className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                         orderForm.channel === ch
-                          ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-                          : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                          ? "bg-gradient-to-r from-rose-600 to-red-700 text-white border-rose-400/40 shadow-md"
+                          : "border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.05]"
                       }`}
                     >
                       {lbl}
@@ -1377,7 +1398,7 @@ export default function ChopEasyApp({
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2 block">
                   Select Menu Items
                 </label>
                 <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
@@ -1388,21 +1409,21 @@ export default function ChopEasyApp({
                       return (
                         <div
                           key={item.id}
-                          className="flex items-center justify-between gap-3 p-2.5 rounded-2xl bg-slate-50 border border-slate-200/80"
+                          className="flex items-center justify-between gap-3 p-2.5 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10"
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
                             {item.image ? (
                               <img
                                 src={item.image}
                                 alt={item.name}
-                                className="w-9 h-9 object-cover rounded-lg shrink-0 border border-slate-200 shadow-2xs"
+                                className="w-9 h-9 object-cover rounded-lg shrink-0 border border-slate-200 dark:border-white/10 shadow-2xs"
                               />
                             ) : (
                               <span className="text-xl">{item.emoji}</span>
                             )}
                             <div className="min-w-0">
-                              <p className="text-xs font-bold text-slate-900 truncate">{item.name}</p>
-                              <p className="font-mono text-xs text-rose-600 font-bold">
+                              <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{item.name}</p>
+                              <p className="font-mono text-xs text-rose-600 dark:text-rose-400 font-bold">
                                 {formatMoney(item.price)}
                               </p>
                             </div>
@@ -1416,17 +1437,17 @@ export default function ChopEasyApp({
                                   if (inCart.qty === 1) removeFromCart(item.id);
                                   else changeQty(item.id, -1);
                                 }}
-                                className="w-7 h-7 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-sm flex items-center justify-center transition-colors"
+                                className="w-7 h-7 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-800 dark:text-white font-bold text-sm flex items-center justify-center transition-colors cursor-pointer"
                               >
                                 −
                               </button>
-                              <span className="font-mono font-bold text-xs w-4 text-center">
+                              <span className="font-mono font-bold text-xs w-4 text-center text-slate-900 dark:text-white">
                                 {inCart.qty}
                               </span>
                               <button
                                 type="button"
                                 onClick={() => changeQty(item.id, 1)}
-                                className="w-7 h-7 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm flex items-center justify-center transition-colors"
+                                className="w-7 h-7 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm flex items-center justify-center transition-colors cursor-pointer"
                               >
                                 +
                               </button>
@@ -1435,7 +1456,7 @@ export default function ChopEasyApp({
                             <button
                               type="button"
                               onClick={() => addToCart(item)}
-                              className="w-7 h-7 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center justify-center transition-colors"
+                              className="w-7 h-7 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center transition-colors cursor-pointer"
                             >
                               <Plus size={14} />
                             </button>
@@ -1447,32 +1468,32 @@ export default function ChopEasyApp({
               </div>
 
               {orderForm.cart.length > 0 && (
-                <div className="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-4">
-                  <p className="text-[10px] font-bold text-amber-900 uppercase tracking-wider mb-2">
+                <div className="bg-amber-500/10 border border-amber-500/25 rounded-2xl p-4">
+                  <p className="text-[10px] font-bold text-amber-600 dark:text-amber-300 uppercase tracking-wider mb-2">
                     Order Summary
                   </p>
-                  <div className="space-y-1.5 divide-y divide-amber-200/40">
+                  <div className="space-y-1.5 divide-y divide-amber-500/20">
                     {orderForm.cart.map((c) => (
-                      <div key={c.menuItemId} className="flex justify-between text-xs pt-1">
-                        <span className="text-slate-800">
+                      <div key={c.menuItemId} className="flex justify-between text-xs pt-1 text-slate-700 dark:text-slate-200">
+                        <span>
                           {c.qty}× {c.name}
                         </span>
-                        <span className="font-mono font-bold text-rose-600">
+                        <span className="font-mono font-bold text-rose-600 dark:text-rose-400">
                           {formatMoney(c.qty * c.unitPrice)}
                         </span>
                       </div>
                     ))}
                   </div>
 
-                  <div className="flex justify-between items-center font-extrabold text-sm pt-2.5 mt-2 border-t border-amber-200 text-slate-900">
+                  <div className="flex justify-between items-center font-extrabold text-sm pt-2.5 mt-2 border-t border-amber-500/20 text-slate-900 dark:text-white">
                     <span>Total Bill:</span>
-                    <span className="font-mono text-base text-rose-600">{formatMoney(cartTotal)}</span>
+                    <span className="font-mono text-base text-rose-600 dark:text-rose-400">{formatMoney(cartTotal)}</span>
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                   Kitchen Notes & Instructions
                 </label>
                 <input
@@ -1480,16 +1501,16 @@ export default function ChopEasyApp({
                   value={orderForm.note}
                   onChange={(e) => setOrderForm((f) => ({ ...f, note: e.target.value }))}
                   placeholder="e.g. Extra pepper, separate soup bag, dispatch call..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                  className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-white/[0.08] focus:outline-none focus:border-rose-500 transition-all"
                 />
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-100 flex-shrink-0">
+            <div className="pt-3 border-t border-slate-200/80 dark:border-white/10 flex-shrink-0">
               <button
                 onClick={placeOrder}
                 disabled={!orderForm.customerName || orderForm.cart.length === 0}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-amber-500 text-white font-bold text-sm shadow-lg shadow-rose-500/25 hover:from-rose-700 hover:to-amber-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 via-rose-500 to-red-600 text-white font-bold text-sm shadow-xl shadow-rose-950/60 hover:from-rose-500 hover:to-red-600 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-95 transition-all duration-300 cursor-pointer border border-rose-400/30"
               >
                 {orderForm.cart.length === 0
                   ? "Select items to place order"
@@ -1502,13 +1523,13 @@ export default function ChopEasyApp({
 
       {/* ── ADD MENU ITEM MODAL ── */}
       {showNewItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-sm border border-slate-100 shadow-2xl">
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-              <h3 className="font-display font-bold text-xl text-slate-900">Add Menu Item</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-xl animate-in fade-in duration-200">
+          <div className="bg-white/95 dark:bg-[#0c0d12]/95 text-slate-900 dark:text-white rounded-3xl p-6 w-full max-w-sm border border-slate-200/80 dark:border-white/10 shadow-2xl">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/80 dark:border-white/10">
+              <h3 className="font-display font-bold text-xl text-slate-900 dark:text-white">Add Menu Item</h3>
               <button
                 onClick={() => setShowNewItem(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-700"
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-800 dark:hover:text-white cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -1517,7 +1538,7 @@ export default function ChopEasyApp({
             <div className="space-y-3.5">
               <div className="grid grid-cols-3 gap-2.5">
                 <div className="col-span-2">
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                     Item Name *
                   </label>
                   <input
@@ -1525,24 +1546,24 @@ export default function ChopEasyApp({
                     value={itemForm.name}
                     onChange={(e) => setItemForm((f) => ({ ...f, name: e.target.value }))}
                     placeholder="e.g. Asun Goat Meat"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                    className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-white/[0.08] focus:outline-none focus:border-rose-500 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                     Emoji
                   </label>
                   <input
                     type="text"
                     value={itemForm.emoji}
                     onChange={(e) => setItemForm((f) => ({ ...f, emoji: e.target.value }))}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-1 text-center text-xl focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                    className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-xl py-1 text-center text-xl text-slate-900 dark:text-white focus:bg-white dark:focus:bg-white/[0.08] focus:outline-none focus:border-rose-500 transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                   Category
                 </label>
                 <div className="grid grid-cols-3 gap-1.5">
@@ -1552,11 +1573,11 @@ export default function ChopEasyApp({
                         key={cat}
                         type="button"
                         onClick={() => setItemForm((f) => ({ ...f, category: cat }))}
-                        className="py-1.5 rounded-xl text-xs font-bold border transition-all capitalize"
+                        className="py-1.5 rounded-xl text-xs font-bold border transition-all capitalize cursor-pointer"
                         style={
                           itemForm.category === cat
                             ? { backgroundColor: meta.bg, color: meta.color, borderColor: meta.color }
-                            : { borderColor: "#e2e8f0", color: "#64748b" }
+                            : { borderColor: "rgba(148, 163, 184, 0.3)", color: "#64748b" }
                         }
                       >
                         {meta.label}
@@ -1567,7 +1588,7 @@ export default function ChopEasyApp({
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 block">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">
                   Price ({currencySymbol}) *
                 </label>
                 <input
@@ -1575,14 +1596,14 @@ export default function ChopEasyApp({
                   value={itemForm.price}
                   onChange={(e) => setItemForm((f) => ({ ...f, price: e.target.value }))}
                   placeholder="e.g. 1500"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:bg-white focus:outline-none focus:border-rose-500 transition-all"
+                  className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white font-mono placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-white/[0.08] focus:outline-none focus:border-rose-500 transition-all"
                 />
               </div>
 
               <button
                 onClick={addMenuItem}
                 disabled={!itemForm.name || !itemForm.price}
-                className="w-full py-3 rounded-2xl bg-gradient-to-r from-rose-600 to-amber-500 text-white font-bold text-xs shadow-md shadow-rose-500/20 hover:from-rose-700 hover:to-amber-600 disabled:opacity-40 transition-all"
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-rose-600 via-rose-500 to-red-600 text-white font-bold text-xs shadow-xl shadow-rose-950/60 hover:from-rose-500 hover:to-red-600 disabled:opacity-40 transition-all cursor-pointer border border-rose-400/30"
               >
                 Add to Kitchen Menu
               </button>

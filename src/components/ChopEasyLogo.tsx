@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTheme } from "@/context/ThemeContext";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg" | "xl";
@@ -23,43 +24,56 @@ export function ChopEasyLogoIcon({
   return (
     <div
       onClick={onClick}
-      className={`relative flex items-center justify-center shrink-0 rounded-2xl shadow-lg shadow-rose-500/25 transition-transform duration-300 hover:scale-105 ${
+      className={`relative flex items-center justify-center shrink-0 rounded-full shadow-lg shadow-rose-500/25 transition-transform duration-300 hover:scale-105 active:scale-95 ${
         onClick ? "cursor-pointer" : ""
       } ${className}`}
       style={{
         width: size,
         height: size,
-        background: "linear-gradient(135deg, #e11d48 0%, #f43f5e 40%, #f59e0b 100%)",
+        background: "linear-gradient(135deg, #ff385c 0%, #e11d48 45%, #f59e0b 100%)",
       }}
     >
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/20 to-transparent pointer-events-none" />
+      {/* Specular glass reflection on cloche circle */}
+      <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/25 via-transparent to-transparent pointer-events-none" />
 
-      {/* Cloche Dome & Rising Ember Spark */}
+      {/* Realistic Cloche Platter & Dome matching screenshot */}
       <svg
         viewBox="0 0 48 48"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-[62%] h-[62%] text-white drop-shadow-sm"
+        className="w-[64%] h-[64%] text-white drop-shadow-xs"
       >
-        <circle cx="24" cy="11" r="3" fill="currentColor" />
+        {/* Handle Knob on top */}
+        <circle cx="24" cy="11.5" r="3.2" fill="white" />
+        {/* Cloche Dome */}
         <path
           d="M10 28C10 20.268 16.268 14 24 14C31.732 14 38 20.268 38 28"
-          stroke="currentColor"
-          strokeWidth="3.2"
+          stroke="white"
+          strokeWidth="3.4"
           strokeLinecap="round"
         />
+        {/* Serving Platter rim */}
         <path
-          d="M7 32C11.5 34.5 36.5 34.5 41 32"
-          stroke="currentColor"
-          strokeWidth="3.2"
+          d="M7 32.5C11.5 35 36.5 35 41 32.5"
+          stroke="white"
+          strokeWidth="3.4"
           strokeLinecap="round"
         />
-        <path d="M24 18C21 21.5 20.5 25 24 28C27 25 27 21.5 24 18Z" fill="#fef08a" />
-        <path
-          d="M17 26.5C19 28 22 28.5 24 28.5"
-          stroke="#fef08a"
-          strokeWidth="2"
+        {/* Cloche Plate Base */}
+        <line
+          x1="11"
+          y1="32"
+          x2="37"
+          y2="32"
+          stroke="white"
+          strokeWidth="2.5"
           strokeLinecap="round"
+        />
+        {/* Inner culinary aroma glow */}
+        <path
+          d="M24 18.5C21.5 21.5 21 24.5 24 27.5C27 24.5 26.5 21.5 24 18.5Z"
+          fill="#fef08a"
+          opacity="0.9"
         />
       </svg>
     </div>
@@ -71,9 +85,14 @@ export default function ChopEasyLogo({
   showTagline = true,
   variant = "full",
   className = "",
-  dark = false,
+  dark,
   onClick,
 }: LogoProps) {
+  const { isDark } = useTheme();
+
+  // If dark prop is explicitly passed, use it; otherwise automatically adapt to the current theme
+  const effectiveDark = dark !== undefined ? dark : isDark;
+
   const sizeMap = {
     sm: { icon: 32, title: "text-lg", tag: "text-[10px]" },
     md: { icon: 42, title: "text-2xl", tag: "text-xs" },
@@ -95,14 +114,14 @@ export default function ChopEasyLogo({
       <ChopEasyLogoIcon size={currentSize.icon} />
 
       <div className="flex flex-col">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <span
-            className={`font-display font-black tracking-tight leading-none ${currentSize.title} ${
-              dark ? "text-white" : "text-slate-900"
+            className={`font-display font-black tracking-tight leading-none transition-colors duration-300 ${currentSize.title} ${
+              effectiveDark ? "text-white" : "text-slate-900"
             }`}
           >
             Chop
-            <span className="text-rose-600 bg-gradient-to-r from-rose-600 to-amber-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#ff385c] via-[#f43f5e] to-[#f59e0b] bg-clip-text text-transparent">
               Easy
             </span>
           </span>
@@ -111,8 +130,8 @@ export default function ChopEasyLogo({
 
         {showTagline && (
           <p
-            className={`font-medium tracking-normal mt-0.5 ${currentSize.tag} ${
-              dark ? "text-slate-400" : "text-slate-500"
+            className={`font-medium tracking-normal mt-0.5 transition-colors duration-300 ${currentSize.tag} ${
+              effectiveDark ? "text-slate-400" : "text-slate-500"
             }`}
           >
             Your food business, sorted

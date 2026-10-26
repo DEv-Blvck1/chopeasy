@@ -150,21 +150,21 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
   ];
 
   return (
-    <section id="pricing" className="py-16 sm:py-24 px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 relative overflow-hidden w-full">
+    <section id="pricing" className="py-16 sm:py-24 px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 relative overflow-hidden w-full text-slate-900 dark:text-white bg-transparent dark:bg-[#060608]">
       {/* Ambient background glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-400/10 blur-3xl pointer-events-none rounded-full" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-rose-600/15 blur-3xl pointer-events-none rounded-full" />
 
       <div className="w-full space-y-12 relative z-10">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200/70 text-rose-600 text-xs font-bold">
-            <Sparkles size={13} className="text-amber-500" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-600 dark:text-rose-300 text-xs font-bold">
+            <Sparkles size={13} className="text-rose-500 dark:text-rose-400" />
             <span>TRANSPARENT, GROW-AS-YOU-COOK PRICING</span>
           </div>
-          <h2 className="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-slate-900 tracking-tight">
+          <h2 className="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-slate-900 dark:text-white tracking-tight">
             Plans Tailored to Every Kitchen Scale
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
             Pay in your local currency with zero hidden commissions. Switch or cancel your subscription at any time.
           </p>
         </div>
@@ -172,7 +172,7 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
         {/* Currency & Location Selector Bar */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           {/* Location Currency Pills */}
-          <div className="flex items-center p-1 rounded-2xl bg-slate-100 border border-slate-200/80 shadow-inner">
+          <div className="flex items-center p-1 rounded-2xl bg-black/[0.04] dark:bg-white/[0.05] border border-black/10 dark:border-white/10 shadow-inner">
             {[
               { id: "NGN", label: "🇳🇬 ₦ Naira (NGN)", code: "NGN" },
               { id: "USD", label: "🇺🇸 $ Dollar (USD)", code: "USD" },
@@ -186,8 +186,8 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
                 }}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   currency === c.code
-                    ? "bg-white text-slate-900 shadow-xs"
-                    : "text-slate-500 hover:text-slate-900"
+                    ? "bg-gradient-to-r from-rose-600 to-red-700 text-white shadow-md shadow-rose-950/50"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 {c.label}
@@ -199,19 +199,19 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
           <button
             onClick={handleDetectCurrency}
             disabled={detectingLoc}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer shadow-xs"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl glass-btn text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer shadow-xs active:scale-95"
           >
-            <MapPin size={14} className={detectingLoc ? "animate-spin text-amber-500" : "text-amber-500"} />
+            <MapPin size={14} className={detectingLoc ? "animate-spin text-rose-500" : "text-rose-500"} />
             <span>{detectingLoc ? "Detecting..." : "Detect Currency by Location"}</span>
           </button>
 
           {/* Billing Cycle Toggle */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-amber-50/80 border border-amber-200/60 text-xs font-bold">
-            <span className={billingCycle === "monthly" ? "text-slate-900" : "text-slate-400"}>Monthly</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-black/[0.04] dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-xs font-bold">
+            <span className={billingCycle === "monthly" ? "text-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400"}>Monthly</span>
             <button
               onClick={() => setBillingCycle(billingCycle === "monthly" ? "yearly" : "monthly")}
               className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
-                billingCycle === "yearly" ? "bg-rose-600" : "bg-slate-300"
+                billingCycle === "yearly" ? "bg-rose-600" : "bg-black/20 dark:bg-white/20"
               }`}
             >
               <div
@@ -220,14 +220,14 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
                 }`}
               />
             </button>
-            <span className={billingCycle === "yearly" ? "text-slate-900" : "text-slate-400"}>
-              Yearly <span className="text-[10px] text-rose-600 bg-rose-100 px-1.5 py-0.5 rounded-full">Save 20%</span>
+            <span className={billingCycle === "yearly" ? "text-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400"}>
+              Yearly <span className="text-[10px] text-rose-600 dark:text-rose-300 bg-rose-500/15 border border-rose-500/30 px-1.5 py-0.5 rounded-full font-bold">Save 20%</span>
             </span>
           </div>
         </div>
 
         {detectedNote && (
-          <div className="max-w-md mx-auto text-center text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 py-1.5 px-3 rounded-xl animate-in fade-in duration-200">
+          <div className="max-w-md mx-auto text-center text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 py-1.5 px-3 rounded-xl animate-in fade-in duration-200">
             {detectedNote}
           </div>
         )}
@@ -242,15 +242,15 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
             return (
               <div
                 key={plan.id}
-                className={`relative rounded-3xl p-7 flex flex-col justify-between transition-all duration-300 ${
+                className={`relative rounded-3xl p-7 flex flex-col justify-between transition-all duration-300 glass-card-dark text-slate-900 dark:text-white ${
                   plan.isPopular
-                    ? "bg-white border-2 border-rose-500 shadow-xl shadow-rose-500/10 md:-translate-y-2"
-                    : "bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-sm hover:shadow-md"
+                    ? "border-2 border-rose-500/80 shadow-2xl shadow-rose-950/20 dark:shadow-rose-950/60 md:-translate-y-2 ring-1 ring-rose-500/40"
+                    : "border border-black/5 dark:border-white/10 shadow-lg hover:border-black/15 dark:hover:border-white/25"
                 }`}
               >
                 {/* Popular Pill */}
                 {plan.isPopular && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-rose-600 to-amber-500 text-white font-black text-[10px] tracking-wider uppercase shadow-md flex items-center gap-1">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-rose-600 to-red-700 text-white font-black text-[10px] tracking-wider uppercase shadow-lg shadow-rose-950/60 flex items-center gap-1 border border-rose-400/40">
                     <Star size={11} fill="white" />
                     <span>{plan.badge}</span>
                   </div>
@@ -260,28 +260,28 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
                   {/* Top Header */}
                   <div>
                     {!plan.isPopular && (
-                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                         {plan.badge}
                       </span>
                     )}
-                    <h3 className="font-display font-extrabold text-2xl text-slate-900 mt-1">
+                    <h3 className="font-display font-extrabold text-2xl text-slate-900 dark:text-white mt-1">
                       {plan.name}
                     </h3>
-                    <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
                       {plan.desc}
                     </p>
                   </div>
 
                   {/* Price */}
-                  <div className="pt-2 border-t border-slate-100">
+                  <div className="pt-2 border-t border-black/5 dark:border-white/10">
                     <div className="flex items-baseline gap-1.5">
-                      <span className="font-display font-black text-4xl sm:text-5xl text-slate-900">
+                      <span className="font-display font-black text-4xl sm:text-5xl text-slate-900 dark:text-white">
                         {currentPrice}
                       </span>
-                      <span className="text-xs text-slate-400 font-bold">{subPeriod}</span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400 font-bold">{subPeriod}</span>
                     </div>
                     {(priceData as any).sub && (
-                      <p className="text-[11px] text-rose-600 font-medium mt-1">
+                      <p className="text-[11px] text-rose-600 dark:text-rose-400 font-medium mt-1">
                         {(priceData as any).sub}
                       </p>
                     )}
@@ -289,11 +289,11 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
 
                   {/* Features List */}
                   <div className="space-y-3 pt-2">
-                    <p className="text-xs font-bold text-slate-700 uppercase tracking-wider">What's included:</p>
+                    <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">What's included:</p>
                     <ul className="space-y-2.5">
                       {plan.features.map((feat, i) => (
-                        <li key={i} className="flex items-start gap-2.5 text-xs text-slate-600 leading-tight">
-                          <div className="p-0.5 rounded-full bg-emerald-100 text-emerald-700 shrink-0 mt-0.5">
+                        <li key={i} className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-300 leading-tight">
+                          <div className="p-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0 mt-0.5">
                             <Check size={12} strokeWidth={3} />
                           </div>
                           <span>{feat}</span>
@@ -307,7 +307,11 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
                 <div className="pt-8">
                   <button
                     onClick={() => onSelectPlan(plan.id, currency)}
-                    className={`w-full py-3.5 px-4 rounded-2xl font-bold text-xs sm:text-sm transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer ${plan.ctaStyle}`}
+                    className={`w-full py-3.5 px-4 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-300 hover:scale-[1.01] active:scale-95 flex items-center justify-center gap-2 cursor-pointer ${
+                      plan.isPopular
+                        ? "bg-gradient-to-r from-rose-600 to-red-700 text-white shadow-lg shadow-rose-950/60 border border-rose-400/40"
+                        : "glass-btn text-white border border-white/15 hover:border-white/30"
+                    }`}
                   >
                     <span>{plan.ctaText}</span>
                     <ArrowRight size={15} />
