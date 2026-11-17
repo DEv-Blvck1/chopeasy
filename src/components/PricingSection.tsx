@@ -150,11 +150,11 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
   ];
 
   return (
-    <section id="pricing" className="py-16 sm:py-24 px-4 sm:px-8 relative overflow-hidden">
+    <section id="pricing" className="py-16 sm:py-24 px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 relative overflow-hidden w-full">
       {/* Ambient background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-400/10 blur-3xl pointer-events-none rounded-full" />
 
-      <div className="max-w-7xl mx-auto space-y-12 relative z-10">
+      <div className="w-full space-y-12 relative z-10">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto space-y-3">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200/70 text-rose-600 text-xs font-bold">

@@ -16,6 +16,7 @@ import LandingPage from "@/components/LandingPage";
 import SettingsModal, { KitchenSettings } from "@/components/SettingsModal";
 import SteamingFoodPlate from "@/components/SteamingFoodPlate";
 import AnalyticsBarChart from "@/components/AnalyticsBarChart";
+import SmokyBackground from "@/components/SmokyBackground";
 
 type OrderStatus = "pending" | "preparing" | "ready" | "delivered" | "cancelled";
 type Category = "rice" | "swallow" | "protein" | "snack" | "drink" | "soup" | "special";
@@ -182,6 +183,7 @@ export default function ChopEasyApp({
   const [isOpen, setIsOpen] = useState(true);
   const [filterStatus, setFilterStatus] = useState<OrderStatus | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<Category | "all">("all");
 
   // Modals state
   const [showNewOrder, setShowNewOrder] = useState(false);
@@ -303,16 +305,17 @@ export default function ChopEasyApp({
 
   // Place order
   const placeOrder = () => {
-    if (!orderForm.customerName || orderForm.cart.length === 0) return;
+    const custName = orderForm.customerName.trim();
+    if (!custName || orderForm.cart.length === 0) return;
     const newOrder: Order = {
       id: genId(),
       orderNo,
-      customerName: orderForm.customerName,
-      customerPhone: orderForm.customerPhone,
+      customerName: custName,
+      customerPhone: orderForm.customerPhone.trim(),
       items: orderForm.cart,
       total: cartTotal,
       status: "pending",
-      note: orderForm.note || undefined,
+      note: orderForm.note.trim() || undefined,
       createdAt: new Date().toISOString(),
       channel: orderForm.channel,
     };
@@ -339,12 +342,14 @@ export default function ChopEasyApp({
 
   // Menu updates
   const addMenuItem = () => {
-    if (!itemForm.name || !itemForm.price) return;
+    const trimmedName = itemForm.name.trim();
+    const parsedPrice = parseFloat(itemForm.price);
+    if (!trimmedName || isNaN(parsedPrice) || parsedPrice <= 0) return;
     const item: MenuItem = {
       id: genId(),
-      name: itemForm.name,
+      name: trimmedName,
       category: itemForm.category,
-      price: parseFloat(itemForm.price),
+      price: Math.round(parsedPrice * 100) / 100,
       available: true,
       emoji: itemForm.emoji || "🍽️",
     };
@@ -357,9 +362,17 @@ export default function ChopEasyApp({
     setMenu((prev) => prev.map((m) => (m.id === id ? { ...m, available: !m.available } : m)));
   };
 
-  // Filter orders by status and search keyword
+  // Filter orders by status, category and search keyword
   const filteredOrders = useMemo(() => {
     let result = filterStatus === "all" ? orders : orders.filter((o) => o.status === filterStatus);
+    if (selectedCategory !== "all") {
+      result = result.filter((o) =>
+        o.items.some((i) => {
+          const mItem = menu.find((m) => m.id === i.menuItemId);
+          return mItem?.category === selectedCategory;
+        })
+      );
+    }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
@@ -370,7 +383,17 @@ export default function ChopEasyApp({
       );
     }
     return result;
-  }, [orders, filterStatus, searchQuery]);
+  }, [orders, filterStatus, searchQuery, selectedCategory, menu]);
+
+  // Filter menu items by category and search keyword
+  const filteredMenu = useMemo(() => {
+    let result = selectedCategory === "all" ? menu : menu.filter((m) => m.category === selectedCategory);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter((m) => m.name.toLowerCase().includes(q) || m.category.toLowerCase().includes(q));
+    }
+    return result;
+  }, [menu, selectedCategory, searchQuery]);
 
   const activeCount = orders.filter((o) => !["delivered", "cancelled"].includes(o.status)).length;
 
@@ -416,7 +439,7 @@ export default function ChopEasyApp({
     <div className="min-h-screen app-wallpaper flex flex-col relative selection:bg-rose-500 selection:text-white">
       {/* ── TOP HEADER ── */}
       <header className="sticky top-0 z-40 glass-header px-4 sm:px-6 py-3 transition-all">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+        <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-8 flex items-center justify-between gap-3">
           {/* Logo with click-to-home redirect */}
           <div className="flex items-center gap-3">
             <ChopEasyLogo
@@ -579,10 +602,10 @@ export default function ChopEasyApp({
       </header>
 
       {/* ── SUBNAV TABS & SEARCH ── */}
-      <div className="sticky top-[58px] z-30 glass-subnav px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div className="sticky top-[58px] z-30 glass-subnav px-4 sm:px-6 lg:px-8 xl:px-12">
+        <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           {/* Main Module Tabs */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 overflow-x-auto scrollbar-none">
             {[
               { id: "orders", label: "Live Orders", count: activeCount, icon: <ShoppingBag size={15} /> },
               { id: "menu", label: "Menu & Inventory", count: menu.length, icon: <Package size={15} /> },
@@ -591,9 +614,9 @@ export default function ChopEasyApp({
               <button
                 key={t.id}
                 onClick={() => setTab(t.id as Tab)}
-                className={`flex items-center gap-2 px-4 py-3 text-xs sm:text-sm font-bold transition-all border-b-2 ${
+                className={`flex items-center gap-2 px-4 py-3 text-xs sm:text-sm font-bold transition-all border-b-2 shrink-0 cursor-pointer ${
                   tab === t.id
-                    ? "border-rose-600 text-rose-600 bg-rose-50/40"
+                    ? "border-rose-600 text-rose-600 bg-rose-50/50"
                     : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
                 }`}
               >
@@ -612,64 +635,125 @@ export default function ChopEasyApp({
             ))}
           </div>
 
-          {/* Search box for orders */}
-          {tab === "orders" && (
-            <div className="relative py-1.5 sm:py-0 w-full sm:w-64">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search order #, customer, item..."
-                className="w-full bg-white/80 border border-slate-200 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-500 transition-all shadow-sm"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                >
-                  <X size={12} />
-                </button>
-              )}
-            </div>
-          )}
+          {/* Search box for orders & dishes */}
+          <div className="relative py-1.5 sm:py-0 w-full sm:w-80">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search dishes, tickets, customers..."
+              className="w-full bg-white/90 border border-slate-200 rounded-xl pl-8 pr-8 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-500 transition-all shadow-xs"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                <X size={12} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* ── MAIN DASHBOARD VIEW ── */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1 w-full relative z-10">
-        {/* ORDERS TAB */}
-        {tab === "orders" && (
-          <div className="space-y-6">
-            {/* Sizzling Kitchen Live Station Banner with Animated Smoke */}
-            <div className="glass-panel rounded-3xl p-5 flex flex-col md:flex-row items-center justify-between gap-5 shadow-sm border border-rose-100/80 bg-gradient-to-r from-white via-amber-50/20 to-rose-50/30">
-              <div className="flex-1 space-y-2 text-center md:text-left">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>Kitchen Station Cooking · {activeCount} Active Orders</span>
-                </div>
-                <h3 className="font-display font-black text-xl sm:text-2xl text-slate-900 leading-snug">
-                  Orders Sizzling & Ready for Prep
-                </h3>
-                <p className="text-xs text-slate-600 max-w-lg leading-relaxed">
-                  Real-time ticket progression active. Only dishes currently in stock are available for customer orders.
-                </p>
-                <div className="flex flex-wrap items-center gap-3 pt-1 justify-center md:justify-start">
-                  <span className="text-xs font-bold text-slate-700 font-mono bg-white px-2.5 py-1 rounded-lg border border-slate-200">
-                    Daily Target: {formatMoney(kitchenSettings.dailyRevenueTarget)}
-                  </span>
-                  <span className="text-xs font-bold text-emerald-700 font-mono bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
-                    Today: {formatMoney(analytics.todayRevenue)}
-                  </span>
-                </div>
+      {/* ── MAIN DASHBOARD VIEW (FULL-SCREEN FLUID LAYOUT) ── */}
+      <main className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-6 flex-1 relative z-10 space-y-6">
+        {/* Sizzling Kitchen Live Station Banner with Animated Smoke */}
+        <div className="relative rounded-3xl p-6 sm:p-8 overflow-hidden shadow-xl border border-slate-800/80 bg-gradient-to-r from-[#0a0f1d] via-[#111827] to-[#1a1829] text-white">
+          {/* Animated Rising Smoke & Embers */}
+          <SmokyBackground intensity="deep" showEmbers={true} className="opacity-75" />
+
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex-1 space-y-3 text-center md:text-left">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-bold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>{isOpen ? "Kitchen Station Live" : "Store Closed"} · {activeCount} Active Orders</span>
+                </span>
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs text-amber-300 font-medium">
+                  <span>📍 {kitchenSettings.location || "Lagos, Nigeria"}</span>
+                </span>
               </div>
 
-              {/* Steaming Food Dish with Animated Smoke */}
-              <div className="w-full md:w-64 max-w-[280px] shrink-0">
-                <SteamingFoodPlate interactive={true} showBadges={false} className="shadow-lg border-white/60" />
+              <h2 className="font-display font-black text-2xl sm:text-3xl lg:text-4xl text-white leading-tight">
+                Good Food, Great <span className="bg-gradient-to-r from-amber-400 via-amber-500 to-rose-500 bg-clip-text text-transparent">Kitchen Flow</span>
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
+                Real-time ticket progression active. Only in-stock dishes can be ordered. Monitor cooking stages from counter walk-ins to WhatsApp delivery.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-3 pt-2 justify-center md:justify-start">
+                <div className="px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 text-xs font-mono shadow-xs">
+                  <span className="text-slate-400 mr-2">Target:</span>
+                  <strong className="text-amber-400 font-bold">{formatMoney(kitchenSettings.dailyRevenueTarget)}</strong>
+                </div>
+                <div className="px-4 py-2 rounded-xl bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 text-xs font-mono shadow-xs">
+                  <span className="text-emerald-300 mr-2">Today:</span>
+                  <strong className="text-emerald-400 font-bold">{formatMoney(analytics.todayRevenue)}</strong>
+                </div>
+                <div className="px-4 py-2 rounded-xl bg-rose-500/20 backdrop-blur-md border border-rose-500/30 text-xs font-mono shadow-xs">
+                  <span className="text-rose-300 mr-2">Avg Ticket:</span>
+                  <strong className="text-rose-400 font-bold">{formatMoney(analytics.avgOrder)}</strong>
+                </div>
               </div>
             </div>
 
+            {/* Steaming Food Dish with Animated Smoke */}
+            <div className="w-full md:w-72 max-w-[320px] shrink-0 relative">
+              <SteamingFoodPlate interactive={true} showBadges={false} className="shadow-2xl border-white/20" />
+            </div>
+          </div>
+        </div>
+
+        {/* Circular Category Strip (Inspired by Modern Food App Concept) */}
+        <div className="space-y-2 pt-1">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Quick Category Filter</span>
+            <span className="text-xs text-slate-500 font-mono">
+              {menu.filter((m) => selectedCategory === "all" || m.category === selectedCategory).length} items
+            </span>
+          </div>
+          <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-none">
+            {[
+              { id: "all", label: "All", emoji: "🍽️" },
+              { id: "rice", label: "Rice", emoji: "🍚" },
+              { id: "soup", label: "Soups", emoji: "🍲" },
+              { id: "swallow", label: "Swallows", emoji: "⚪" },
+              { id: "protein", label: "Proteins", emoji: "🍗" },
+              { id: "snack", label: "Small Chops", emoji: "🍢" },
+              { id: "drink", label: "Beverages", emoji: "🍹" },
+              { id: "special", label: "Specials", emoji: "👑" },
+            ].map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id as any)}
+                className="flex flex-col items-center gap-1.5 shrink-0 group cursor-pointer"
+              >
+                <div
+                  className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-2xl transition-all ${
+                    selectedCategory === cat.id
+                      ? "bg-gradient-to-tr from-rose-600 to-amber-500 text-white ring-4 ring-rose-500/25 scale-105 shadow-md"
+                      : "bg-white border-2 border-slate-200/90 text-slate-700 hover:border-amber-400 group-hover:scale-105 shadow-xs"
+                  }`}
+                >
+                  {cat.emoji}
+                </div>
+                <span
+                  className={`text-[11px] sm:text-xs font-bold transition-colors ${
+                    selectedCategory === cat.id ? "text-rose-600 font-extrabold" : "text-slate-600"
+                  }`}
+                >
+                  {cat.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ORDERS TAB */}
+        {tab === "orders" && (
+          <div className="space-y-6">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex gap-1.5 sm:gap-2 flex-wrap">
                 {(["all", "pending", "preparing", "ready", "delivered", "cancelled"] as const).map((s) => {
@@ -710,8 +794,8 @@ export default function ChopEasyApp({
               </div>
             </div>
 
-            {/* Orders Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {/* Orders Grid (Full-Width Fluid Responsive Layout) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
               {filteredOrders.map((order) => {
                 const cfg = STATUS_CFG[order.status];
                 const isActive = !["delivered", "cancelled"].includes(order.status);
@@ -878,114 +962,163 @@ export default function ChopEasyApp({
           </div>
         )}
 
-        {/* MENU TAB */}
+        {/* MENU TAB (CONCEPT INSPIRED BY MODERN FOOD PORTAL) */}
         {tab === "menu" && (
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h2 className="font-display font-extrabold text-2xl text-slate-900 tracking-tight">
-                  Menu & Kitchen Inventory
+                  Featured Dishes & Kitchen Catalog
                 </h2>
                 <p className="text-xs text-slate-500">
                   <span className="font-bold text-emerald-600">
-                    {menu.filter((m) => m.available).length} of {menu.length}
+                    {filteredMenu.filter((m) => m.available).length} of {filteredMenu.length}
                   </span>{" "}
-                  dishes currently available for customers
+                  dishes currently available for customers · Click toggle to mark sold-out
                 </p>
               </div>
 
               <button
                 onClick={() => setShowNewItem(true)}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-bold hover:bg-slate-800 transition-all shadow-md shadow-slate-900/10"
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-bold hover:bg-slate-800 transition-all shadow-md shadow-slate-900/10 cursor-pointer"
               >
                 <Plus size={16} /> Add Menu Item
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {(Object.entries(menuByCategory) as [Category, MenuItem[]][]).map(([cat, items]) => {
-                const meta = CATEGORY_META[cat];
-                return (
-                  <div key={cat} className="glass-panel rounded-3xl overflow-hidden shadow-sm">
-                    <div
-                      className="px-5 py-3 border-b flex items-center justify-between"
-                      style={{
-                        backgroundColor: meta.bg,
-                        borderColor: meta.border,
-                      }}
-                    >
-                      <span className="text-xs font-extrabold uppercase tracking-wider" style={{ color: meta.color }}>
-                        {meta.label}
-                      </span>
-                      <span className="text-[11px] font-semibold text-slate-500 font-mono">
-                        {items.length} items
-                      </span>
-                    </div>
+            {/* Featured Dishes Card Grid (Full-Width Responsive) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-5">
+              {filteredMenu.map((item) => (
+                <div
+                  key={item.id}
+                  className={`group rounded-3xl bg-white/90 backdrop-blur-md border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col justify-between ${
+                    !item.available ? "opacity-60 bg-slate-50" : ""
+                  }`}
+                >
+                  <div>
+                    {/* Dish Photo Container */}
+                    <div className="relative w-full aspect-[4/3] overflow-hidden bg-slate-100">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-slate-100 text-5xl">
+                          {item.emoji}
+                        </div>
+                      )}
 
-                    <div className="divide-y divide-slate-100">
-                      {items.map((item) => (
-                        <div
-                          key={item.id}
-                          className={`flex items-center justify-between gap-3 px-5 py-3.5 transition-colors ${
-                            !item.available ? "opacity-50 bg-slate-50/50" : "hover:bg-white"
+                      {/* Category Badge & Bestseller on Photo */}
+                      <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                        <span className="px-2.5 py-1 rounded-full bg-slate-950/75 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider shadow-xs">
+                          {item.category}
+                        </span>
+                        {item.bestseller && (
+                          <span className="flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-bold shadow-xs">
+                            <Star size={10} fill="currentColor" /> Best
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Stock Status Badge */}
+                      <div className="absolute bottom-3 right-3">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold shadow-xs ${
+                            item.available
+                              ? "bg-emerald-500 text-white"
+                              : "bg-rose-600 text-white"
                           }`}
                         >
-                          <div className="flex items-center gap-3 min-w-0">
-                            {item.image ? (
-                              <img
-                                src={item.image}
-                                alt={item.name}
-                                className="w-11 h-11 object-cover rounded-xl shrink-0 border border-slate-200/80 shadow-xs"
-                              />
-                            ) : (
-                              <span className="text-2xl p-1.5 rounded-xl bg-slate-50 border border-slate-100 shrink-0">
-                                {item.emoji}
-                              </span>
-                            )}
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2">
-                                <p className="font-bold text-sm text-slate-900 truncate">{item.name}</p>
-                                {item.bestseller && (
-                                  <span className="flex items-center gap-0.5 text-[10px] text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full font-bold">
-                                    <Star size={10} fill="#f59e0b" className="text-amber-500" /> Best
-                                  </span>
-                                )}
-                              </div>
-                              <p className="font-mono text-xs font-extrabold text-rose-600 mt-0.5">
-                                {formatMoney(item.price)}
-                              </p>
-                            </div>
-                          </div>
+                          {item.available ? "In Stock" : "Sold Out"}
+                        </span>
+                      </div>
+                    </div>
 
-                          <div className="flex items-center gap-3 shrink-0">
-                            <button
-                              onClick={() => toggleAvailable(item.id)}
-                              title={item.available ? "Available (Click to mark sold out)" : "Sold out (Click to mark available)"}
-                              className={`relative w-12 h-6 rounded-full transition-all ${
-                                item.available ? "bg-emerald-600" : "bg-slate-300"
-                              }`}
-                            >
-                              <span
-                                className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-all ${
-                                  item.available ? "left-6" : "left-1"
-                                }`}
-                              />
-                            </button>
+                    {/* Dish Details */}
+                    <div className="p-4 space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <h3 className="font-display font-bold text-sm text-slate-900 truncate">
+                          {item.name}
+                        </h3>
+                        <span className="flex items-center gap-0.5 text-[11px] font-bold text-amber-500">
+                          <Star size={12} fill="#f59e0b" /> 4.9
+                        </span>
+                      </div>
 
-                            <button
-                              onClick={() => setMenu((m) => m.filter((mi) => mi.id !== item.id))}
-                              title="Delete Item"
-                              className="p-1.5 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                      <div className="flex items-baseline justify-between pt-1">
+                        <span className="font-mono font-black text-base text-rose-600">
+                          {formatMoney(item.price)}
+                        </span>
+                        <span className="text-[11px] text-slate-400 font-medium">Standard plate</span>
+                      </div>
                     </div>
                   </div>
-                );
-              })}
+
+                  {/* Actions Bar */}
+                  <div className="px-4 pb-4 pt-2 border-t border-slate-100/90 flex items-center justify-between gap-2">
+                    <button
+                      onClick={() => toggleAvailable(item.id)}
+                      title={item.available ? "Click to mark sold out" : "Click to mark available"}
+                      className={`text-[11px] font-bold px-2.5 py-1.5 rounded-xl border transition-colors ${
+                        item.available
+                          ? "bg-slate-100 text-slate-700 border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200"
+                          : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                      }`}
+                    >
+                      {item.available ? "Mark Sold Out" : "Mark Available"}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        addToCart(item);
+                        setShowNewOrder(true);
+                      }}
+                      disabled={!item.available}
+                      className="flex-1 py-1.5 px-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 text-white font-bold text-xs shadow-xs hover:from-rose-700 hover:to-amber-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <Plus size={13} />
+                      <span>Add</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Special Offer Promotional Banner (Inspired by Screenshot Concept) */}
+            <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-slate-950 via-slate-900 to-rose-950 text-white relative overflow-hidden shadow-xl border border-white/10 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="relative z-10 space-y-2 text-center md:text-left">
+                <span className="text-[10px] font-black uppercase tracking-widest text-amber-400 px-2.5 py-1 rounded-full bg-amber-400/15 border border-amber-400/30">
+                  Kitchen Dispatch Guarantee
+                </span>
+                <h3 className="font-display font-black text-2xl sm:text-3xl text-white">
+                  Flat 20% OFF Catering & Large Orders
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-300 max-w-lg">
+                  Automate bulk event tickets, small chops platters, and custom party packs directly via WhatsApp dispatch.
+                </p>
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
+                  <div className="px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 font-mono text-xs font-bold text-amber-300">
+                    Use Code: CHOPEASY20
+                  </div>
+                  <button
+                    onClick={() => setShowNewOrder(true)}
+                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 text-white font-bold text-xs shadow-md hover:from-rose-700 hover:to-amber-600 transition-all cursor-pointer"
+                  >
+                    Take Customer Order →
+                  </button>
+                </div>
+              </div>
+
+              {/* Dish Visual */}
+              <div className="w-48 sm:w-60 h-32 sm:h-36 rounded-2xl overflow-hidden shrink-0 border-2 border-white/20 shadow-2xl relative">
+                <img
+                  src="/images/dishes/small-chops.png"
+                  alt="Platter"
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
           </div>
         )}
@@ -1488,7 +1621,7 @@ export default function ChopEasyApp({
 
       {/* ── FOOTER ── */}
       <footer className="mt-auto border-t border-slate-200/60 bg-white/60 backdrop-blur-md py-4 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+        <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
           <div className="flex items-center gap-2">
             <span className="font-extrabold text-slate-800">ChopEasy OS</span>
             <span>·</span>
